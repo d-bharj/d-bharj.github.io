@@ -670,7 +670,10 @@
     position: absolute;
     right: 0;
     top: calc(100% + 10px);
-    min-width: 168px;
+    display: flex;
+    gap: 4px;
+    width: 304px;
+    max-width: calc(100vw - 24px);
     background: var(--bg);
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -681,6 +684,21 @@
     transform: translateY(-6px);
     transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
     z-index: 101;
+  }
+  .theme-group{ flex: 1; min-width: 0; }
+  .theme-group + .theme-group{
+    border-left: 1px solid var(--line);
+    padding-left: 4px;
+  }
+  .theme-group-label{
+    display: block;
+    padding: 4px 9px 6px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    opacity: 0.75;
   }
   .theme-wrap.open .theme-menu{
     opacity: 1;
@@ -2070,15 +2088,21 @@
       <div class="theme-wrap">
         <button class="theme-toggle" id="theme-picker" type="button" aria-label="Choose colour theme" aria-haspopup="listbox" aria-expanded="false" title="Theme"><span id="theme-icon">◐</span></button>
         <div class="theme-menu" id="theme-menu" role="listbox" aria-label="Colour themes">
-          <button class="theme-opt" type="button" role="option" data-theme="system"><span class="swatch" style="--s1:#F4F3EE;--s2:#12213B"></span>System<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="light"><span class="swatch" style="--s1:#F4F3EE;--s2:#B8912E"></span>Light<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="dark"><span class="swatch" style="--s1:#0B1220;--s2:#D2A63C"></span>Dark<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="regatta"><span class="swatch" style="--s1:#F2E2C4;--s2:#1F5E93"></span>Regatta<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="guild"><span class="swatch" style="--s1:#F9F2EA;--s2:#154CA2"></span>Guild<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="glacier"><span class="swatch" style="--s1:#0A76B2;--s2:#FFFFFF"></span>Glacier<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="retro-fuji"><span class="swatch" style="--s1:#F2EEE3;--s2:#1E3A8A"></span>Retro Fuji<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="old-money"><span class="swatch" style="--s1:#1B3A2B;--s2:#B7975C"></span>Old Money<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="news"><span class="swatch" style="--s1:#F3EEE3;--s2:#A81620"></span>News<span class="check">✓</span></button>
+          <div class="theme-group" role="group" aria-label="Standard">
+            <span class="theme-group-label">Standard</span>
+            <button class="theme-opt" type="button" role="option" data-theme="system"><span class="swatch" style="--s1:#F4F3EE;--s2:#12213B"></span>System<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="light"><span class="swatch" style="--s1:#F4F3EE;--s2:#B8912E"></span>Light<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="dark"><span class="swatch" style="--s1:#0B1220;--s2:#D2A63C"></span>Dark<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="regatta"><span class="swatch" style="--s1:#F2E2C4;--s2:#1F5E93"></span>Regatta<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="guild"><span class="swatch" style="--s1:#F9F2EA;--s2:#154CA2"></span>Guild<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="glacier"><span class="swatch" style="--s1:#0A76B2;--s2:#FFFFFF"></span>Glacier<span class="check">✓</span></button>
+          </div>
+          <div class="theme-group" role="group" aria-label="Editorial">
+            <span class="theme-group-label">Editorial</span>
+            <button class="theme-opt" type="button" role="option" data-theme="retro-fuji"><span class="swatch" style="--s1:#F2EEE3;--s2:#1E3A8A"></span>Retro Fuji<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="old-money"><span class="swatch" style="--s1:#1B3A2B;--s2:#B7975C"></span>Old Money<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="news"><span class="swatch" style="--s1:#F3EEE3;--s2:#A81620"></span>News<span class="check">✓</span></button>
+          </div>
         </div>
       </div>
     </div>
