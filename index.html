@@ -115,6 +115,8 @@
     --accent-soft: #F3EEE3;
     --line: rgba(25,22,19,0.28);
     --display: 'Newsreader', 'Times New Roman', Georgia, serif;
+    --paper: #F6F1E6;
+    --desk: #E1D8C1;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -1580,6 +1582,25 @@
     color: var(--accent);
   }
 
+  /* ---- Paper: backing sheet, grain + vignette ---- */
+  [data-theme="news"] body{ background: var(--desk); }
+  [data-theme="news"] body::after{
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1495;
+    pointer-events: none;
+    background-image:
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="p"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23p)" fill-opacity="0.35"/></svg>'),
+      radial-gradient(ellipse at center, transparent 55%, rgba(60,45,25,0.12) 100%);
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+  }
+  [data-theme="news"] .wrap{
+    padding: 0;
+    counter-reset: page 1;
+  }
+
   /* ---- Edition strip + nav ---- */
   [data-theme="news"] .topnav{
     background: color-mix(in srgb, var(--bg) 92%, transparent);
@@ -1621,11 +1642,14 @@
   }
   [data-theme="news"] .topnav-links a:hover{ color: var(--accent); }
 
-  /* ---- Hero: nameplate + ears + byline ---- */
+  /* ---- Hero: front page ---- */
   [data-theme="news"] header{
     position: relative;
-    padding: 88px 0 64px;
+    padding: 88px 34px 64px;
+    border-top: 1px solid var(--fg);
     border-bottom: 3px solid var(--fg);
+    background: var(--paper);
+    box-shadow: 0 12px 28px rgba(48,38,22,0.20);
   }
   [data-theme="news"] header::before{
     content: "EST. 2025 · MANCHESTER";
@@ -1717,14 +1741,47 @@
     color: var(--accent);
   }
 
-  /* ---- Sections: kicker tags + headlines ---- */
-  [data-theme="news"] section{ border-top: 2px solid var(--fg); }
+  /* ---- Sections: each section is a numbered newspaper page ---- */
+  [data-theme="news"] .wrap > section{
+    margin-top: 28px;
+  }
+  [data-theme="news"] section{
+    padding: 0 34px 52px;
+    border-top: 1px solid var(--fg);
+    border-bottom: 1px solid var(--fg);
+    background: var(--paper);
+    box-shadow: 0 12px 28px rgba(48,38,22,0.20);
+    counter-increment: page;
+  }
+  [data-theme="news"] section::before{
+    content: "THE DAILY BHARDWAJ — MANCHESTER EDITION · PAGE " counter(page, decimal-leading-zero);
+    display: block;
+    margin: 0 -34px 44px;
+    padding: 9px 34px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--fg-soft);
+  }
+  [data-theme="news"] section::after{
+    content: "— " counter(page, decimal-leading-zero) " —";
+    display: block;
+    margin-top: 40px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-align: center;
+    color: var(--fg-soft);
+  }
   [data-theme="news"] .section-head::after{
     content: "NATIONAL";
-    position: absolute;
-    top: -34px;
-    right: 0;
-    z-index: 2;
+    margin-left: auto;
+    align-self: center;
     font-family: var(--mono);
     font-size: 10px;
     letter-spacing: 0.16em;
@@ -1886,11 +1943,17 @@
     border-top: 3px solid var(--accent);
   }
 
-  /* ---- Footer: colophon ---- */
+  /* ---- Footer: back-page colophon ---- */
   [data-theme="news"] footer{
     align-items: center;
     justify-content: flex-start;
     gap: 12px 24px;
+    padding: 48px 34px 56px;
+    margin-top: 28px;
+    border-top: 1px solid var(--fg);
+    border-bottom: 1px solid var(--fg);
+    background: var(--paper);
+    box-shadow: 0 12px 28px rgba(48,38,22,0.20);
   }
   [data-theme="news"] footer::before{
     content: "SET IN NEWSREADER · PRINTED IN MANCHESTER · AUGUST 2026";
@@ -1923,7 +1986,21 @@
     [data-theme="news"] header::after{ display: none; }
     [data-theme="news"] .topnav::after{ display: none; }
     [data-theme="news"] .topnav::before{ padding: 8px 28px 6px; font-size: 9px; }
-    [data-theme="news"] header{ padding-top: 48px; }
+    [data-theme="news"] header{ padding: 48px 22px 48px; }
+    [data-theme="news"] .wrap > section{ margin-top: 20px; }
+    [data-theme="news"] section{
+      padding: 0 22px 40px;
+    }
+    [data-theme="news"] section::before{
+      content: "PAGE " counter(page, decimal-leading-zero);
+      margin: 0 -22px 34px;
+      padding: 8px 22px;
+    }
+    [data-theme="news"] section::after{ margin-top: 30px; }
+    [data-theme="news"] footer{
+      padding: 40px 22px 44px;
+      margin-top: 20px;
+    }
     [data-theme="news"] h1{
       font-size: clamp(40px, 11vw, 64px);
     }
