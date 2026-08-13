@@ -7,7 +7,7 @@
 <script>
   (function () {
     document.documentElement.classList.add("js");
-    var THEMES = ["light", "dark", "regatta", "guild", "glacier", "retro-fuji", "old-money", "news"];
+    var THEMES = ["light", "dark", "regatta", "guild", "glacier", "retro-fuji", "old-money", "news", "news2"];
     var t = null;
     try { t = localStorage.getItem("db-theme"); } catch (e) {}
     if (!t || THEMES.indexOf(t) === -1) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
@@ -15,7 +15,7 @@
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;0,6..72,800;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Anton&family=Zen+Kaku+Gothic+New:wght@900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;0,6..72,800;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Anton&family=Zen+Kaku+Gothic+New:wght@900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <style>
   :root{
@@ -117,6 +117,21 @@
     --display: 'Newsreader', 'Times New Roman', Georgia, serif;
     --paper: #F6F1E6;
     --desk: #E1D8C1;
+  }
+  html[data-theme="news2"]{
+    --bg: #EDE6D3;
+    --bg-dim: #E4DCC4;
+    --fg: #1A1A1A;
+    --fg-soft: #4A453C;
+    --panel: #1A1A1A;
+    --panel-hover: #2B2722;
+    --accent: #1A1A1A;
+    --accent-soft: #EDE6D3;
+    --line: rgba(26,26,26,0.6);
+    --display: 'Playfair Display', 'Newsreader', 'Times New Roman', Georgia, serif;
+    --body: 'EB Garamond', Georgia, serif;
+    --paper: #EDE6D3;
+    --desk: #DBD2B8;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -2049,6 +2064,615 @@
     }
   }
 
+  /* ============================================================
+     NEWS 2 — dense old broadsheet
+     Aged paper · ink · hairline double-rules · multi-column
+     ============================================================ */
+
+  /* ---- Flat print: no shadows, no rounded corners ---- */
+  [data-theme="news2"] *{
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* ---- Body: aged paper + faint grain ---- */
+  [data-theme="news2"] body{ background: var(--desk); }
+  [data-theme="news2"] body::after{
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1495;
+    pointer-events: none;
+    background-image:
+      url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n2"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23n2)" fill-opacity="0.5"/></svg>');
+    opacity: 0.3;
+    mix-blend-mode: multiply;
+  }
+  [data-theme="news2"] .wrap{
+    padding: 0;
+    counter-reset: page 1;
+  }
+
+  /* ---- Ticker: ink band ---- */
+  [data-theme="news2"] .ticker{
+    background: var(--panel);
+    color: var(--accent-soft);
+    border-bottom: 3px double var(--fg);
+  }
+  [data-theme="news2"] .ticker-track{ font-size: 12px; letter-spacing: 0.04em; }
+  [data-theme="news2"] .ticker-track span b{ color: var(--accent-soft); font-weight: 700; }
+  [data-theme="news2"] .ticker-track span::after{
+    content: "·";
+    color: var(--accent-soft);
+  }
+
+  /* ---- Topnav: section-index masthead bar ---- */
+  [data-theme="news2"] .topnav{
+    background: var(--paper);
+    border-bottom: 3px double var(--fg);
+  }
+  [data-theme="news2"] .topnav::before{
+    content: "VOL. I — NO. 1 · MANCHESTER";
+    display: block;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 6px 28px 5px;
+    border-bottom: 1px solid var(--fg);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .topnav::after{
+    content: "EST. 2025";
+    position: absolute;
+    top: 6px;
+    right: max(28px, calc(50% - 460px + 28px));
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .topnav-brand{ display: none; }
+  [data-theme="news2"] .topnav-in{ height: 38px; }
+  [data-theme="news2"] .topnav-links{
+    gap: 0;
+    margin-left: auto;
+  }
+  [data-theme="news2"] .topnav-links a{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .topnav-links a + a::before{
+    content: "│";
+    margin: 0 14px;
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] .topnav-links a:hover,
+  [data-theme="news2"] .topnav-links a.active{ color: var(--fg-soft); }
+
+  /* ---- Masthead (front page) ---- */
+  [data-theme="news2"] header{
+    position: relative;
+    padding: 40px 34px 38px;
+    border-top: 1px solid var(--fg);
+    border-bottom: 4px double var(--fg);
+    background: var(--paper);
+  }
+  [data-theme="news2"] header::before{
+    content: "EST. 2025";
+    position: absolute;
+    top: 14px;
+    left: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] header::after{
+    content: "EQUITY RESEARCH";
+    position: absolute;
+    top: 14px;
+    right: 0;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] .eyebrow{
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin-bottom: 16px;
+  }
+  [data-theme="news2"] .eyebrow::after{
+    content: " · AUGUST 2026";
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] h1{
+    max-width: none;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(44px, 8.5vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  [data-theme="news2"] .role{
+    max-width: 56ch;
+    margin: 14px auto 0;
+    text-align: center;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(17px, 2vw, 19px);
+  }
+  [data-theme="news2"] .rotator{
+    text-align: center;
+    font-family: var(--display);
+    font-size: clamp(18px, 2.4vw, 22px);
+  }
+  [data-theme="news2"] .rotator-label{
+    font-family: var(--display);
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] .caret{ color: var(--fg); }
+  [data-theme="news2"] .hero-meta{
+    justify-content: center;
+    gap: 8px 0;
+    margin-top: 24px;
+    padding: 10px 0;
+    border-top: 1px solid var(--fg);
+    border-bottom: 1px solid var(--fg);
+    font-family: var(--display);
+    font-size: 13px;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .hero-meta::before{
+    content: "MANCHESTER, ENGLAND —";
+    margin-right: 12px;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  [data-theme="news2"] .hero-meta a{ border-bottom: none; }
+  [data-theme="news2"] .hero-meta a:hover{ color: var(--fg-soft); }
+  [data-theme="news2"] .hero-meta a:not(:last-child)::after{
+    content: "|";
+    margin: 0 12px;
+    color: var(--fg-soft);
+  }
+
+  /* ---- Sections: pages with double rules ---- */
+  [data-theme="news2"] .wrap > section{ margin-top: 22px; }
+  [data-theme="news2"] section{
+    padding: 0 28px 44px;
+    border-top: 3px double var(--fg);
+    border-bottom: 3px double var(--fg);
+    background: var(--paper);
+    counter-increment: page;
+  }
+  [data-theme="news2"] section::before{
+    content: "THE BHARDWAJ BROADSHEET · MANCHESTER · PAGE " counter(page, decimal-leading-zero);
+    display: block;
+    margin: 0 -28px 34px;
+    padding: 7px 28px;
+    border-bottom: 1px solid var(--fg);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--fg);
+  }
+  [data-theme="news2"] section::after{
+    content: "— " counter(page, decimal-leading-zero) " —";
+    display: block;
+    margin-top: 30px;
+    padding-top: 9px;
+    border-top: 1px solid var(--fg);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-align: center;
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] .section-head{ margin-bottom: 24px; }
+  [data-theme="news2"] .section-head h2{
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(24px, 3vw, 32px);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  [data-theme="news2"] .section-head::after{
+    content: "NATIONAL";
+    margin-left: auto;
+    align-self: center;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="news2"] #experience .section-head::after{ content: "CAREER"; }
+  [data-theme="news2"] #featured .section-head::after{ content: "FEATURES"; }
+  [data-theme="news2"] #projects .section-head::after{ content: "BUSINESS"; }
+  [data-theme="news2"] #skills .section-head::after{ content: "MARKETS"; }
+
+  /* ---- About: true multi-column justified serif ---- */
+  [data-theme="news2"] .about-text{
+    column-count: 3;
+    column-gap: 30px;
+    column-rule: 1px solid var(--fg);
+    max-width: none;
+    font-family: var(--body);
+    font-size: 13.5px;
+    line-height: 1.5;
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .about-text::first-letter{
+    float: left;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 3.2em;
+    line-height: 0.82;
+    padding: 2px 8px 0 0;
+    text-transform: uppercase;
+  }
+
+  /* ---- Stats: boxed at-a-glance panel ---- */
+  [data-theme="news2"] .stats{
+    position: relative;
+    margin-top: 30px;
+    gap: 0;
+    padding: 26px 20px 20px;
+    border: 1px solid var(--fg);
+    border-top: 3px double var(--fg);
+    background: var(--paper);
+  }
+  [data-theme="news2"] .stats::before{
+    content: "AT A GLANCE";
+    position: absolute;
+    top: -9px;
+    left: 16px;
+    padding: 0 10px;
+    background: var(--paper);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .stat + .stat{
+    border-left: 1px solid var(--fg);
+    padding-left: 18px;
+  }
+  [data-theme="news2"] .stat-num{
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(22px, 2.6vw, 28px);
+    color: var(--fg);
+    line-height: 1.05;
+  }
+  [data-theme="news2"] .stat-label{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    margin-top: 4px;
+  }
+
+  /* ---- Experience: dense copy under dateline headlines ---- */
+  [data-theme="news2"] .entry{
+    display: block;
+    padding: 16px 0;
+    border-top: 1px solid var(--fg);
+  }
+  [data-theme="news2"] .entry:first-of-type{ border-top: none; }
+  [data-theme="news2"] .entry-date{
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg);
+    padding-top: 0;
+  }
+  [data-theme="news2"] .entry-title{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  [data-theme="news2"] .entry-org{
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--fg-soft);
+    margin-bottom: 8px;
+  }
+  [data-theme="news2"] .entry ul{
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--fg);
+    padding-left: 20px;
+  }
+  [data-theme="news2"] .entry li{
+    margin-bottom: 4px;
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+
+  /* ---- Projects: classified front-page cards ---- */
+  [data-theme="news2"] .project-card{
+    background: none;
+    border: 1px solid var(--fg);
+    padding: 18px 20px;
+  }
+  [data-theme="news2"] .project-card::before{ display: none; }
+  [data-theme="news2"] .project-tag{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    margin-bottom: 6px;
+  }
+  [data-theme="news2"] .project-card h3{
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+  [data-theme="news2"] .project-card p{
+    font-family: var(--body);
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .stack{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--fg-soft);
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+  [data-theme="news2"] .code-tab{
+    background: var(--panel);
+    color: var(--accent-soft);
+    border: 1px solid var(--fg);
+    border-left: 3px solid var(--fg);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+  }
+  [data-theme="news2"] .code-tab:hover{
+    background: var(--panel-hover);
+    border-color: var(--fg);
+  }
+  [data-theme="news2"] .repo-link{ border-bottom: 1px solid var(--fg); }
+  [data-theme="news2"] .repo-link:hover{ color: var(--fg); border-color: var(--fg); }
+
+  /* ---- Featured: front-page box ---- */
+  [data-theme="news2"] .featured{
+    background: none;
+    border: 1px solid var(--fg);
+    border-top: 3px double var(--fg);
+    padding: 26px 28px;
+  }
+  [data-theme="news2"] .featured-tag{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    margin-bottom: 8px;
+  }
+  [data-theme="news2"] .featured h2{
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(24px, 3vw, 30px);
+    margin-bottom: 8px;
+  }
+  [data-theme="news2"] .featured p{
+    font-family: var(--body);
+    font-size: 13.5px;
+    line-height: 1.5;
+    text-align: justify;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    max-width: none;
+    color: var(--fg);
+  }
+  [data-theme="news2"] .pitch-btn{
+    background: var(--panel);
+    color: var(--accent-soft);
+    border: 1px solid var(--fg);
+    border-left: 3px solid var(--fg);
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+  }
+  [data-theme="news2"] .pitch-btn:hover{
+    background: var(--panel-hover);
+    border-color: var(--fg);
+  }
+  [data-theme="news2"] .viewer-link{ border-bottom: 1px solid var(--fg); }
+  [data-theme="news2"] .viewer-link:hover{ color: var(--fg); border-color: var(--fg); }
+
+  /* ---- Skills: bracketed inline text ---- */
+  [data-theme="news2"] .chips{ gap: 4px 14px; }
+  [data-theme="news2"] .chip{
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--fg);
+    padding: 1px 0;
+    background: none;
+    border: none;
+  }
+  [data-theme="news2"] .chip::before{ content: "[ "; }
+  [data-theme="news2"] .chip::after{ content: " ]"; color: var(--fg-soft); }
+  [data-theme="news2"] .chip:hover{ color: var(--fg-soft); }
+  [data-theme="news2"] .skills-group h4{
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--fg);
+  }
+  [data-theme="news2"] .skills-group li{
+    font-family: var(--body);
+    font-size: 13px;
+    color: var(--fg);
+    border-top: none;
+    padding: 3px 0;
+  }
+
+  /* ---- Dash panels: framed exhibits ---- */
+  [data-theme="news2"] .dash-panel{
+    background: var(--bg-dim);
+    border: 1px solid var(--fg);
+    border-top: 3px double var(--fg);
+  }
+
+  /* ---- Footer: back-page colophon ---- */
+  [data-theme="news2"] footer{
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px 24px;
+    padding: 40px 28px 44px;
+    margin-top: 22px;
+    border-top: 3px double var(--fg);
+    border-bottom: 1px solid var(--fg);
+    background: var(--paper);
+    font-family: var(--display);
+    font-size: 12px;
+  }
+  [data-theme="news2"] footer::before{
+    content: "SET IN PLAYFAIR DISPLAY & EB GARAMOND · PRINTED IN MANCHESTER · AUGUST 2026";
+    flex-basis: 100%;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    padding-top: 14px;
+    border-top: 1px solid var(--fg);
+  }
+  [data-theme="news2"] footer::after{
+    content: "— 30 —";
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.12em;
+    color: var(--fg);
+  }
+
+  /* ---- News 2: mobile ---- */
+  @media (max-width: 680px){
+    [data-theme="news2"] header::before,
+    [data-theme="news2"] header::after{ display: none; }
+    [data-theme="news2"] .topnav::after{ display: none; }
+    [data-theme="news2"] .topnav::before{ padding: 6px 22px 5px; font-size: 9px; }
+    [data-theme="news2"] header{ padding: 36px 22px 32px; }
+    [data-theme="news2"] .wrap > section{ margin-top: 16px; }
+    [data-theme="news2"] section{
+      padding: 0 20px 36px;
+    }
+    [data-theme="news2"] section::before{
+      content: "PAGE " counter(page, decimal-leading-zero);
+      margin: 0 -20px 28px;
+      padding: 6px 20px;
+    }
+    [data-theme="news2"] section::after{ margin-top: 24px; }
+    [data-theme="news2"] footer{
+      padding: 34px 20px 38px;
+      margin-top: 16px;
+    }
+    [data-theme="news2"] h1{
+      font-size: clamp(38px, 10.5vw, 58px);
+    }
+    [data-theme="news2"] .eyebrow{
+      font-size: 10px;
+      letter-spacing: 0.24em;
+    }
+    [data-theme="news2"] .about-text{
+      column-count: 1;
+      text-align: left;
+      -webkit-hyphens: none;
+      hyphens: none;
+    }
+    [data-theme="news2"] .section-head::after{ display: none; }
+    [data-theme="news2"] .stat + .stat{
+      border-left: none;
+      padding-left: 0;
+    }
+    [data-theme="news2"] .stat:nth-child(n+3){
+      border-top: 1px solid var(--fg);
+      padding-top: 14px;
+    }
+    [data-theme="news2"] .stats{
+      gap: 0 20px;
+      padding-top: 30px;
+    }
+    [data-theme="news2"] .hero-meta{
+      justify-content: flex-start;
+      gap: 6px 0;
+    }
+    [data-theme="news2"] .projects{ grid-template-columns: 1fr; }
+    [data-theme="news2"] .topnav-links a{
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
+    [data-theme="news2"] .topnav-links a + a::before{ margin: 0 9px; }
+  }
+
   @media (prefers-reduced-motion: reduce){
     .ticker-track,
     .js .reveal,
@@ -2102,6 +2726,7 @@
             <button class="theme-opt" type="button" role="option" data-theme="retro-fuji"><span class="swatch" style="--s1:#F2EEE3;--s2:#1E3A8A"></span>Retro Fuji<span class="check">✓</span></button>
             <button class="theme-opt" type="button" role="option" data-theme="old-money"><span class="swatch" style="--s1:#1B3A2B;--s2:#B7975C"></span>Old Money<span class="check">✓</span></button>
             <button class="theme-opt" type="button" role="option" data-theme="news"><span class="swatch" style="--s1:#F3EEE3;--s2:#A81620"></span>News<span class="check">✓</span></button>
+            <button class="theme-opt" type="button" role="option" data-theme="news2"><span class="swatch" style="--s1:#EDE6D3;--s2:#1A1A1A"></span>News 2<span class="check">✓</span></button>
           </div>
         </div>
       </div>
