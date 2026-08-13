@@ -7,7 +7,7 @@
 <script>
   (function () {
     document.documentElement.classList.add("js");
-    var THEMES = ["light", "dark", "regatta", "guild", "glacier", "retro-fuji"];
+    var THEMES = ["light", "dark", "regatta", "guild", "glacier", "retro-fuji", "old-money"];
     var t = null;
     try { t = localStorage.getItem("db-theme"); } catch (e) {}
     if (!t || THEMES.indexOf(t) === -1) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
@@ -15,7 +15,7 @@
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Anton&family=Zen+Kaku+Gothic+New:wght@900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Anton&family=Zen+Kaku+Gothic+New:wght@900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <style>
   :root{
@@ -91,6 +91,18 @@
     --pop: #E0762E;
     --shadow: rgba(30,58,138,0.22);
     --card-bg: #FCF9F0;
+  }
+  html[data-theme="old-money"]{
+    --bg: #1B3A2B;
+    --bg-dim: #22442F;
+    --fg: #F3EEE0;
+    --fg-soft: #C9CDBB;
+    --panel: #162E21;
+    --panel-hover: #1E3C2B;
+    --accent: #B7975C;
+    --accent-soft: #D9C79A;
+    --line: rgba(243,238,224,0.14);
+    --display: 'Playfair Display', 'Newsreader', serif;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -1138,6 +1150,81 @@
   }
   [data-theme^="retro"] footer a{ border-bottom: none; }
 
+  /* ---- Old Money: deep green field, brass accents, hairline rules ---- */
+  [data-theme="old-money"] .topnav{
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom-color: var(--line);
+  }
+  [data-theme="old-money"] .topnav-brand{
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+  }
+  [data-theme="old-money"] .topnav-links a{
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  [data-theme="old-money"] .stat-num{
+    font-size: clamp(40px, 5.5vw, 56px);
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.01em;
+  }
+  [data-theme="old-money"] .stat-label{
+    font-size: 11px;
+    letter-spacing: 0.12em;
+  }
+  [data-theme="old-money"] .entry-date{
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  [data-theme="old-money"] .entry-title{
+    letter-spacing: 0.01em;
+  }
+  [data-theme="old-money"] .section-head h2::after{
+    width: 56px;
+    height: 1px;
+  }
+  [data-theme="old-money"] .featured{
+    border-color: var(--line);
+  }
+  [data-theme="old-money"] .featured-tag,
+  [data-theme="old-money"] .project-tag{
+    font-size: 11px;
+    letter-spacing: 0.14em;
+  }
+  [data-theme="old-money"] .project-card{
+    box-shadow: none;
+  }
+  [data-theme="old-money"] .project-card::before{
+    width: 2px;
+  }
+  [data-theme="old-money"] .chip{
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  [data-theme="old-money"] .chip:hover{
+    color: var(--accent);
+    background: transparent;
+    transform: none;
+  }
+  [data-theme="old-money"] .dash-panel{
+    background: var(--bg-dim);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+  }
+  @media (hover: hover) and (pointer: fine){
+    [data-theme="old-money"] .project-card:hover{
+      box-shadow: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce){
     .ticker-track,
     .js .reveal,
@@ -1184,6 +1271,7 @@
           <button class="theme-opt" type="button" role="option" data-theme="guild"><span class="swatch" style="--s1:#F9F2EA;--s2:#154CA2"></span>Guild<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="glacier"><span class="swatch" style="--s1:#0A76B2;--s2:#FFFFFF"></span>Glacier<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="retro-fuji"><span class="swatch" style="--s1:#F2EEE3;--s2:#1E3A8A"></span>Retro Fuji<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="old-money"><span class="swatch" style="--s1:#1B3A2B;--s2:#B7975C"></span>Old Money<span class="check">✓</span></button>
         </div>
       </div>
     </div>
@@ -1635,7 +1723,7 @@
     var picker = document.getElementById("theme-picker");
     var menu = document.getElementById("theme-menu");
     var themeIcon = document.getElementById("theme-icon");
-    var DARK_ISH = { dark: 1, glacier: 1 };
+    var DARK_ISH = { dark: 1, glacier: 1, "old-money": 1 };
     function currentTheme() { return document.documentElement.getAttribute("data-theme") || "light"; }
     function storedTheme() { try { return localStorage.getItem("db-theme"); } catch (e) { return null; } }
     function isSystem() { return !storedTheme(); }
