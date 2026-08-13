@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daniel Bhardwaj — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #12213B;
+    --ink-soft: #2B3A55;
+    --paper: #F4F3EE;
+    --paper-dim: #E7E4DA;
+    --gold: #B8912E;
+    --gold-soft: #E4D5A8;
+    --line: rgba(18,33,59,0.14);
+    --display: 'Newsreader', serif;
+    --body: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a{color:inherit;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px;}
+
+  /* ---- Ticker ---- */
+  .ticker{
+    background: var(--ink);
+    color: var(--gold-soft);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--gold);
+  }
+  .ticker-track{
+    display:inline-block;
+    padding: 9px 0;
+    animation: scroll 32s linear infinite;
+  }
+  .ticker-track span{margin-right: 48px;}
+  .ticker-track span b{color:#fff; font-weight:500;}
+  @keyframes scroll{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .ticker-track{animation:none;}
+  }
+
+  /* ---- Header / Hero ---- */
+  header{
+    padding: 76px 0 56px;
+    border-bottom: 1px solid var(--line);
+  }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+  }
+  h1{
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(40px, 6vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    max-width: 12ch;
+  }
+  .role{
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(18px, 2.4vw, 22px);
+    color: var(--ink-soft);
+    margin-top: 14px;
+    max-width: 46ch;
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 10px 28px;
+    margin-top: 34px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .hero-meta a{ text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+  .hero-meta a:hover{ border-color: var(--gold); color: var(--gold); }
+
+  /* ---- Section shell ---- */
+  section{padding: 64px 0; border-bottom: 1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    margin-bottom: 34px;
+  }
+  .section-num{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--gold);
+  }
+  h2{
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 28px;
+  }
+
+  /* ---- About ---- */
+  .about-text{
+    font-size: 17px;
+    max-width: 62ch;
+    color: var(--ink-soft);
+  }
+  .about-text strong{color:var(--ink); font-weight:600;}
+
+  /* ---- Experience ---- */
+  .entry{
+    display:grid;
+    grid-template-columns: 160px 1fr;
+    gap: 24px;
+    padding: 22px 0;
+    border-top: 1px solid var(--line);
+  }
+  .entry:first-of-type{border-top:none;}
+  .entry-date{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--gold);
+    padding-top: 3px;
+  }
+  .entry-title{
+    font-family: var(--display);
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .entry-org{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .entry ul{ padding-left: 18px; font-size: 15px; color: var(--ink-soft);}
+  .entry li{ margin-bottom: 6px; }
+
+  /* ---- Projects ---- */
+  .projects{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 680px){ .projects{grid-template-columns:1fr;} }
+  .project-card{
+    background: var(--paper-dim);
+    border: 1px solid var(--line);
+    padding: 26px;
+    position:relative;
+  }
+  .project-card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+  }
+  .project-tag{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .project-card h3{
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 19px;
+    margin-bottom: 10px;
+  }
+  .project-card p{
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  .stack{
+    margin-top: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  /* ---- Skills ---- */
+  .skills-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 680px){ .skills-grid{grid-template-columns:1fr 1fr;} }
+  .skills-group h4{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .skills-group ul{ list-style:none; }
+  .skills-group li{
+    font-size: 14.5px;
+    padding: 5px 0;
+    border-top: 1px solid var(--line);
+  }
+  .skills-group li:first-of-type{border-top:none;}
+
+  /* ---- Footer ---- */
+  footer{
+    padding: 48px 0 60px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  footer a{ text-decoration:none; border-bottom:1px solid var(--line); }
+  footer a:hover{ color: var(--gold); border-color: var(--gold); }
+
+  :focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <span><b>DCF</b> Valuation</span>
+      <span><b>PPE</b> University of York</span>
+      <span><b>TMDX</b> Highest buy vote, Griff Fund</span>
+      <span><b>Python</b> yfinance · Pandas</span>
+      <span><b>Tableau</b> Dashboards for FCA, News Corp</span>
+      <span><b>DCF</b> Valuation</span>
+      <span><b>PPE</b> University of York</span>
+      <span><b>TMDX</b> Highest buy vote, Griff Fund</span>
+      <span><b>Python</b> yfinance · Pandas</span>
+      <span><b>Tableau</b> Dashboards for FCA, News Corp</span>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <div class="eyebrow">Portfolio · Manchester, UK</div>
+      <h1>Daniel Bhardwaj</h1>
+      <p class="role">PPE student building the case for decisions with data — equity research, valuation models, and the pipelines behind them.</p>
+      <div class="hero-meta">
+        <a href="mailto:danielbhardwaj123@gmail.com">danielbhardwaj123@gmail.com</a>
+        <a href="tel:+4407377063412">+44 07377 063412</a>
+        <a href="#" target="_blank">LinkedIn</a>
+        <a href="#" target="_blank">GitHub</a>
+        <a href="#" target="_blank">Tableau</a>
+      </div>
+    </header>
+
+    <section id="about">
+      <div class="section-head"><span class="section-num">01</span><h2>About</h2></div>
+      <p class="about-text">
+        I study <strong>Philosophy, Politics & Economics</strong> at the University of York, where the pull toward
+        rigorous argument meets a pull toward markets. Most of my work lives at that intersection: turning messy
+        data into a defensible thesis, whether that's a stock pitch for a <strong>£40,000 student-led fund</strong>
+        or a dashboard a client actually uses. I build the pipelines myself where I can — Python over spreadsheets
+        when the question is big enough to warrant it.
+      </p>
+    </section>
+
+    <section id="experience">
+      <div class="section-head"><span class="section-num">02</span><h2>Experience</h2></div>
+
+      <div class="entry">
+        <div class="entry-date">2025 — Present</div>
+        <div>
+          <div class="entry-title">Equity Analyst</div>
+          <div class="entry-org">Griff Student Investment Fund, University of York</div>
+          <ul>
+            <li>Built DCF valuation models and trading comps to evaluate stock pitches for a £40,000 fund</li>
+            <li>Co-authored a pitch on TransMedics (NASDAQ: TMDX) using Refinitiv Workspace — secured the highest buy vote of the year</li>
+            <li>Selected for the Roses Pitch competition team against Lancaster University, re-underwriting the core thesis under a 48-hour sprint</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-date">Sep 2024 — Apr 2025</div>
+        <div>
+          <div class="entry-title">Data Intern — Consulting</div>
+          <div class="entry-org">Fornax Advisory UK</div>
+          <ul>
+            <li>Built automated sales dashboards in Tableau and Excel for corporate clients including the FCA and News Corp</li>
+            <li>Audited complex datasets to ensure accuracy and consistency across reporting deliverables</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="entry-date">2023 — Present</div>
+        <div>
+          <div class="entry-title">Piano Tutor</div>
+          <div class="entry-org">Self-employed, Manchester</div>
+          <ul>
+            <li>Teach 10+ students aged 7–18, managing scheduling, client communication, and tailored learning plans</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="section-head"><span class="section-num">03</span><h2>Projects</h2></div>
+      <div class="projects">
+        <div class="project-card">
+          <div class="project-tag">Valuation Pipeline</div>
+          <h3>Automated Comparable Company Analysis</h3>
+          <p>
+            A Python pipeline using yfinance to pull fundamentals, calculate Enterprise Values, and compute
+            EV/EBITDA, EV/Sales, and P/E multiples — with peer benchmarking logic that outputs 25th/75th
+            percentile valuation bands into interactive Tableau dashboards.
+          </p>
+          <div class="stack">Python · yfinance · Tableau</div>
+        </div>
+        <div class="project-card">
+          <div class="project-tag">Market Model</div>
+          <h3>European Gas Volatility & Weather Correlation</h3>
+          <p>
+            Three years of European TTF gas price dynamics set against regional weather data. Calculated
+            Heating Degree Days and ran OLS regression to isolate 2-sigma price residuals and flag
+            non-weather supply shocks.
+          </p>
+          <div class="stack">Python · Pandas · OLS Regression</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="section-head"><span class="section-num">04</span><h2>Skills</h2></div>
+      <div class="skills-grid">
+        <div class="skills-group">
+          <h4>Financial Analysis</h4>
+          <ul>
+            <li>DCF Valuation</li>
+            <li>Multiples Analysis</li>
+            <li>Equity Research</li>
+          </ul>
+        </div>
+        <div class="skills-group">
+          <h4>Data & Tools</h4>
+          <ul>
+            <li>Python (Pandas, NumPy)</li>
+            <li>SQL</li>
+            <li>Tableau</li>
+            <li>Excel (Power Query, Pivot Tables)</li>
+          </ul>
+        </div>
+        <div class="skills-group">
+          <h4>Platforms</h4>
+          <ul>
+            <li>Refinitiv Workspace</li>
+            <li>PowerPoint</li>
+            <li>Git / GitHub</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2026 Daniel Bhardwaj</span>
+      <span>Built with HTML, CSS, and a deadline.</span>
+    </footer>
+  </div>
+
+</body>
+</html>
