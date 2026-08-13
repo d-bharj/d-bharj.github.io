@@ -1150,24 +1150,250 @@
   }
   [data-theme^="retro"] footer a{ border-bottom: none; }
 
-  /* ---- Old Money: deep green field, brass accents, hairline rules ---- */
+  /* ============================================================
+     OLD MONEY — "Equity Research Note" (full restructure)
+     Deep green field · brass accents · hairlines · masthead
+     ============================================================ */
+
+  /* ---- Masthead nav (two tiers) ---- */
   [data-theme="old-money"] .topnav{
-    background: color-mix(in srgb, var(--bg) 78%, transparent);
-    border-bottom-color: var(--line);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    border-bottom: 1px solid var(--line);
   }
-  [data-theme="old-money"] .topnav-brand{
+  [data-theme="old-money"] .topnav::before{
+    content: "Daniel Bhardwaj";
+    display: block;
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 10px 28px 7px;
     font-family: var(--display);
     font-weight: 500;
-    font-size: 17px;
-    letter-spacing: 0.02em;
+    font-size: 20px;
+    letter-spacing: 0.01em;
+    color: var(--fg);
+  }
+  [data-theme="old-money"] .topnav::after{
+    content: "EQUITY RESEARCH · MANCHESTER";
+    position: absolute;
+    top: 14px;
+    right: max(28px, calc(50% - 460px + 28px));
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="old-money"] .topnav-brand{ display: none; }
+  [data-theme="old-money"] .topnav-in{
+    border-top: 1px solid var(--line);
   }
   [data-theme="old-money"] .topnav-links a{
     font-size: 12px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
+
+  /* ---- Hero: ghost wordmark, dateline, seal, holdings line ---- */
+  [data-theme="old-money"] header{
+    position: relative;
+    overflow: hidden;
+    padding: 84px 0 60px;
+    border-bottom: 1px solid var(--line);
+  }
+  [data-theme="old-money"] header::before{
+    content: "BHARDWAJ";
+    position: absolute;
+    top: 58px;
+    right: -30px;
+    z-index: 0;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(72px, 15.5vw, 208px);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(243, 238, 224, 0.07);
+    pointer-events: none;
+    user-select: none;
+  }
+  [data-theme="old-money"] header::after{
+    content: "DB";
+    position: absolute;
+    top: 12px;
+    right: 0;
+    z-index: 2;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 17px;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  [data-theme="old-money"] .eyebrow{
+    position: relative;
+    z-index: 1;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  [data-theme="old-money"] .eyebrow::after{
+    content: " · AUG 2026";
+    color: var(--fg-soft);
+  }
+  [data-theme="old-money"] h1{
+    position: relative;
+    z-index: 1;
+    font-size: clamp(44px, 8vw, 88px);
+    font-weight: 600;
+    line-height: 1.04;
+    letter-spacing: 0;
+  }
+  [data-theme="old-money"] h1::after{
+    content: ".";
+    color: var(--accent);
+    margin-left: -0.24em;
+  }
+  [data-theme="old-money"] .role{
+    position: relative;
+    z-index: 1;
+    font-size: clamp(20px, 2.8vw, 26px);
+  }
+  [data-theme="old-money"] .rotator{
+    font-size: clamp(19px, 2.6vw, 24px);
+  }
+  [data-theme="old-money"] .rotator-label{
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="old-money"] .caret{ color: var(--accent); }
+  [data-theme="old-money"] .hero-meta{
+    position: relative;
+    z-index: 1;
+    padding: 13px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  [data-theme="old-money"] .hero-meta a{
+    border-bottom: none;
+    color: var(--fg-soft);
+    letter-spacing: 0.02em;
+  }
+  [data-theme="old-money"] .hero-meta a:hover{ color: var(--accent); }
+  [data-theme="old-money"] .hero-meta a:not(:last-child)::after{
+    content: "·";
+    margin-left: 14px;
+    color: var(--accent);
+  }
+
+  /* ---- Side rail (vertical, fixed) ---- */
+  [data-theme="old-money"] body::before{
+    content: "EST. 2025 · PRIVATE CLIENT · MANCHESTER";
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    writing-mode: vertical-rl;
+    z-index: 5;
+    padding-left: 14px;
+    border-left: 1px solid var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    pointer-events: none;
+  }
+
+  /* ---- Sections: double rules + crests + datelines ---- */
+  [data-theme="old-money"] section{ border-top: 1px solid var(--line); }
+  [data-theme="old-money"] .section-head::before{
+    content: "◆";
+    position: absolute;
+    top: -64px;
+    left: 50%;
+    transform: translateX(-50%) translateY(calc(-50% - 1px));
+    z-index: 2;
+    font-size: 9px;
+    line-height: 1;
+    color: var(--accent);
+    background: var(--bg);
+    padding: 0 12px;
+  }
+  [data-theme="old-money"] .section-head::after{
+    content: "PROFILE · CURRENT";
+    position: absolute;
+    top: -34px;
+    right: 0;
+    z-index: 2;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+  }
+  [data-theme="old-money"] #experience .section-head::after{ content: "CAREER TO DATE"; }
+  [data-theme="old-money"] #featured .section-head::after{ content: "GRIFF FUND · 2026"; }
+  [data-theme="old-money"] #projects .section-head::after{ content: "OPEN SOURCE"; }
+  [data-theme="old-money"] #skills .section-head::after{ content: "CORE · TOOLS"; }
+  [data-theme="old-money"] .section-num{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+  [data-theme="old-money"] .section-head h2{
+    font-size: clamp(30px, 3.6vw, 40px);
+    letter-spacing: 0.01em;
+  }
+  [data-theme="old-money"] .section-head h2::after{
+    width: 56px;
+    height: 1px;
+  }
+  [data-theme="old-money"] .about-text{
+    font-size: 17.5px;
+    line-height: 1.65;
+  }
+
+  /* ---- Stats: market snapshot band ---- */
+  [data-theme="old-money"] .stats{
+    position: relative;
+    margin-top: 44px;
+    gap: 0;
+    padding: 40px 28px 26px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    background: var(--bg-dim);
+  }
+  [data-theme="old-money"] .stats::before{
+    content: "MARKET SNAPSHOT — AS OF AUG 2026";
+    position: absolute;
+    top: 13px;
+    left: 28px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  [data-theme="old-money"] .stat + .stat{
+    border-left: 1px solid var(--line);
+    padding-left: 22px;
+  }
   [data-theme="old-money"] .stat-num{
-    font-size: clamp(40px, 5.5vw, 56px);
+    font-size: clamp(38px, 5.5vw, 54px);
     font-weight: 600;
     color: var(--accent);
     letter-spacing: 0.01em;
@@ -1175,6 +1401,25 @@
   [data-theme="old-money"] .stat-label{
     font-size: 11px;
     letter-spacing: 0.12em;
+  }
+
+  /* ---- Experience: ledger of record ---- */
+  [data-theme="old-money"] #experience::before{
+    content: "PERIOD · FIRM / ROLE";
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  [data-theme="old-money"] .entry{
+    transition: box-shadow 0.2s ease;
+  }
+  [data-theme="old-money"] .entry:hover{
+    box-shadow: inset 3px 0 0 var(--accent);
   }
   [data-theme="old-money"] .entry-date{
     font-size: 11px;
@@ -1184,24 +1429,44 @@
   [data-theme="old-money"] .entry-title{
     letter-spacing: 0.01em;
   }
-  [data-theme="old-money"] .section-head h2::after{
-    width: 56px;
-    height: 1px;
+
+  /* ---- Projects: exhibition plates ---- */
+  [data-theme="old-money"] .projects{ counter-reset: plate; }
+  [data-theme="old-money"] .project-card{
+    counter-increment: plate;
+    box-shadow: none;
   }
-  [data-theme="old-money"] .featured{
-    border-color: var(--line);
+  [data-theme="old-money"] .project-card::after{
+    content: "PLATE " counter(plate, upper-roman);
+    position: absolute;
+    top: 24px;
+    right: 26px;
+    z-index: 1;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--fg-soft);
+  }
+  [data-theme="old-money"] .project-card::before{
+    width: 2px;
   }
   [data-theme="old-money"] .featured-tag,
   [data-theme="old-money"] .project-tag{
     font-size: 11px;
     letter-spacing: 0.14em;
   }
-  [data-theme="old-money"] .project-card{
-    box-shadow: none;
+  [data-theme="old-money"] .featured{
+    border-color: var(--line);
   }
-  [data-theme="old-money"] .project-card::before{
-    width: 2px;
+
+  /* ---- Ticker: gold accents + separators ---- */
+  [data-theme="old-money"] .ticker-track span b{ color: var(--accent); }
+  [data-theme="old-money"] .ticker-track span::after{
+    content: " · ";
+    color: var(--accent);
   }
+
+  /* ---- Skills chips ---- */
   [data-theme="old-money"] .chip{
     border-radius: 999px;
     font-family: var(--mono);
@@ -1214,14 +1479,77 @@
     background: transparent;
     transform: none;
   }
+
+  /* ---- Dash panels: framed exhibits ---- */
   [data-theme="old-money"] .dash-panel{
     background: var(--bg-dim);
     border: 1px solid var(--line);
     border-left: 3px solid var(--accent);
   }
+
+  /* ---- Footer: colophon ---- */
+  [data-theme="old-money"] footer{
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px 24px;
+  }
+  [data-theme="old-money"] footer::before{
+    content: "SET IN PLAYFAIR DISPLAY & IBM PLEX MONO · MANCHESTER";
+    flex-basis: 100%;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-soft);
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  [data-theme="old-money"] footer::after{
+    content: "DB";
+    font-family: var(--display);
+    font-size: 26px;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
   @media (hover: hover) and (pointer: fine){
     [data-theme="old-money"] .project-card:hover{
       box-shadow: none;
+    }
+  }
+
+  /* ---- Old Money: mobile ---- */
+  @media (max-width: 680px){
+    [data-theme="old-money"] body::before{ display: none; }
+    [data-theme="old-money"] .topnav::after{ display: none; }
+    [data-theme="old-money"] .topnav::before{ padding: 8px 28px 6px; font-size: 18px; }
+    [data-theme="old-money"] header{ padding-top: 40px; }
+    [data-theme="old-money"] header::before{
+      top: 60px;
+      right: 0;
+      font-size: 15.5vw;
+    }
+    [data-theme="old-money"] header::after{
+      top: 8px;
+      width: 44px;
+      height: 44px;
+      font-size: 14px;
+    }
+    [data-theme="old-money"] h1{
+      font-size: clamp(38px, 11vw, 56px);
+    }
+    [data-theme="old-money"] .section-head::after{ display: none; }
+    [data-theme="old-money"] .section-head::before{ top: -58px; }
+    [data-theme="old-money"] .stat + .stat{
+      border-left: none;
+      padding-left: 0;
+    }
+    [data-theme="old-money"] .stat:nth-child(n+3){
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+    [data-theme="old-money"] .stats{
+      gap: 0 24px;
+      padding-top: 38px;
     }
   }
 
