@@ -7,7 +7,7 @@
 <script>
   (function () {
     document.documentElement.classList.add("js");
-    var THEMES = ["light", "dark", "regatta", "lagoon", "guild", "glacier", "retro-fuji", "retro-okinawa", "retro-citypop", "retro-wave"];
+    var THEMES = ["light", "dark", "regatta", "guild", "glacier", "retro-fuji"];
     var t = null;
     try { t = localStorage.getItem("db-theme"); } catch (e) {}
     if (!t || THEMES.indexOf(t) === -1) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
@@ -55,17 +55,6 @@
     --accent-soft: #DCCB9F;
     --line: rgba(34,61,113,0.16);
   }
-  html[data-theme="lagoon"]{
-    --bg: #F7F4E8;
-    --bg-dim: #ECE7D4;
-    --fg: #1A1E19;
-    --fg-soft: #4C514A;
-    --panel: #1A1E19;
-    --panel-hover: #2A2F28;
-    --accent: #1C8B9B;
-    --accent-soft: #BFE3E8;
-    --line: rgba(26,30,25,0.14);
-  }
   html[data-theme="guild"]{
     --bg: #F9F2EA;
     --bg-dim: #EFE3D2;
@@ -101,51 +90,6 @@
     --poster: url("assets/retro/fuji.jpg");
     --pop: #E0762E;
     --shadow: rgba(30,58,138,0.22);
-    --card-bg: #FCF9F0;
-  }
-  html[data-theme="retro-okinawa"]{
-    --bg: #F2EEE3;
-    --bg-dim: #E8E1CF;
-    --fg: #1C2218;
-    --fg-soft: #4A5442;
-    --panel: #0E5E6C;
-    --panel-hover: #127082;
-    --accent: #1FB6C8;
-    --accent-soft: #BDE6EA;
-    --line: rgba(28,34,24,0.18);
-    --poster: url("assets/retro/okinawa.jpg");
-    --pop: #6C7A2F;
-    --shadow: rgba(28,34,24,0.22);
-    --card-bg: #FCF9F0;
-  }
-  html[data-theme="retro-citypop"]{
-    --bg: #F2EEE3;
-    --bg-dim: #E8E1CF;
-    --fg: #14345F;
-    --fg-soft: #3E5A86;
-    --panel: #14345F;
-    --panel-hover: #1C4278;
-    --accent: #F26B5E;
-    --accent-soft: #F6CFC8;
-    --line: rgba(20,52,95,0.18);
-    --poster: url("assets/retro/september-wind.jpg");
-    --pop: #2EC8D8;
-    --shadow: rgba(20,52,95,0.22);
-    --card-bg: #FCF9F0;
-  }
-  html[data-theme="retro-wave"]{
-    --bg: #F2EEE3;
-    --bg-dim: #E8E1CF;
-    --fg: #1B3A6B;
-    --fg-soft: #425E8A;
-    --panel: #1B3A6B;
-    --panel-hover: #224A85;
-    --accent: #2F9EA8;
-    --accent-soft: #C4E4E8;
-    --line: rgba(27,58,107,0.18);
-    --poster: url("assets/retro/ame-no-wednesday.jpg");
-    --pop: #FFFFFF;
-    --shadow: rgba(27,58,107,0.22);
     --card-bg: #FCF9F0;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
@@ -285,6 +229,10 @@
   }
   .entry ul{ padding-left: 18px; font-size: 15px; color: var(--fg-soft);}
   .entry li{ margin-bottom: 6px; }
+  @media (max-width: 680px){
+    .entry{ grid-template-columns: 1fr; gap: 4px 0; }
+    .entry-date{ padding-top: 0; margin-bottom: 4px; }
+  }
 
   /* ---- Projects ---- */
   .projects{
@@ -1144,6 +1092,31 @@
     letter-spacing: 0.14em;
   }
   [data-theme^="retro"] .stack{ color: var(--fg-soft); }
+  [data-theme^="retro"] .projects{ align-items: stretch; }
+  [data-theme^="retro"] .entry{ grid-template-columns: 128px 1fr; }
+
+  /* --- Retro mobile: stack the poster, tighten the title --- */
+  @media (max-width: 900px){
+    [data-theme^="retro"] .wrap > header{ padding: 84px 20px 64px; }
+    [data-theme^="retro"] .hero-poster{
+      position: static;
+      order: 9;
+      align-self: flex-start;
+      margin: 26px 0 44px;
+      width: clamp(140px, 38vw, 200px);
+    }
+    [data-theme^="retro"] .hero-poster::after{ left: 0; }
+    [data-theme^="retro"] .wrap > header h1{
+      font-size: clamp(3rem, 14vw, 5rem);
+      margin-left: -8px;
+      max-width: none;
+    }
+    [data-theme^="retro"] .kanji{
+      font-size: clamp(6rem, 38vw, 11rem);
+      right: -0.04em;
+      bottom: -0.1em;
+    }
+  }
 
   /* --- Footer: tracked caps + double rule --- */
   [data-theme^="retro"] footer{
@@ -1206,13 +1179,9 @@
           <button class="theme-opt" type="button" role="option" data-theme="light"><span class="swatch" style="--s1:#F4F3EE;--s2:#B8912E"></span>Light<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="dark"><span class="swatch" style="--s1:#0B1220;--s2:#D2A63C"></span>Dark<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="regatta"><span class="swatch" style="--s1:#F2E2C4;--s2:#1F5E93"></span>Regatta<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="lagoon"><span class="swatch" style="--s1:#F7F4E8;--s2:#1C8B9B"></span>Lagoon<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="guild"><span class="swatch" style="--s1:#F9F2EA;--s2:#154CA2"></span>Guild<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="glacier"><span class="swatch" style="--s1:#0A76B2;--s2:#FFFFFF"></span>Glacier<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="retro-fuji"><span class="swatch" style="--s1:#F2EEE3;--s2:#1E3A8A"></span>Retro Fuji<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="retro-okinawa"><span class="swatch" style="--s1:#F2EEE3;--s2:#0E5E6C"></span>Retro Okinawa<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="retro-citypop"><span class="swatch" style="--s1:#F2EEE3;--s2:#F26B5E"></span>Retro City Pop<span class="check">✓</span></button>
-          <button class="theme-opt" type="button" role="option" data-theme="retro-wave"><span class="swatch" style="--s1:#F2EEE3;--s2:#2F9EA8"></span>Retro Wave<span class="check">✓</span></button>
         </div>
       </div>
     </div>
@@ -1380,7 +1349,7 @@
               <button class="panel-close" type="button" data-panel="comps-dash" aria-label="Close">✕</button>
             </div>
             <div class="dash-body">
-              <iframe class="dash-frame" title="SaaS Enterprise Tech Valuation Dashboard" data-src="https://public.tableau.com/views/EnterpriseTechValuationDashboard/SaaSEnterpriseTechValuationDashboard:language=en-US&:display_count=n&:origin=viz_share_link&:embed=y" loading="lazy"></iframe>
+              <iframe class="dash-frame" title="SaaS Enterprise Tech Valuation Dashboard" data-src="https://public.tableau.com/views/EnterpriseTechValuationDashboard/SaaSEnterpriseTechValuationDashboard?:language=en-US&:display_count=n&:origin=viz_share_link&:embed=y&:showVizHome=no" loading="lazy"></iframe>
             </div>
           </div>
           </div>
@@ -1416,7 +1385,7 @@
               <button class="panel-close" type="button" data-panel="gas-dash" aria-label="Close">✕</button>
             </div>
             <div class="dash-body">
-              <iframe class="dash-frame" title="Gas Price Weather Sensitivity Model" data-src="https://public.tableau.com/views/GasPriceWeatherSensitivityModel/Dashboard1:language=en-US&:display_count=n&:origin=viz_share_link&:embed=y" loading="lazy"></iframe>
+              <iframe class="dash-frame" title="Gas Price Weather Sensitivity Model" data-src="https://public.tableau.com/views/GasPriceWeatherSensitivityModel/Dashboard1?:language=en-US&:display_count=n&:origin=viz_share_link&:embed=y&:showVizHome=no" loading="lazy"></iframe>
             </div>
           </div>
           </div>
