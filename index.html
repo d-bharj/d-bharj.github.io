@@ -237,6 +237,8 @@
   .featured-actions{ margin-top: 22px; }
   .pitch-btn{
     display: inline-block;
+    appearance: none;
+    cursor: pointer;
     background: var(--ink);
     color: var(--gold-soft);
     font-family: var(--mono);
@@ -252,6 +254,65 @@
   .pitch-btn:hover{
     background: #1B2B4D;
     border-color: var(--gold);
+  }
+  .pitch-btn:focus-visible{
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+  .viewer-link{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 1px;
+  }
+  .viewer-link:hover{ color: var(--gold); border-color: var(--gold); }
+  .pitch-viewer{
+    margin-top: 0;
+    background: var(--ink);
+    border-left: 3px solid var(--gold);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .featured.viewer-open .pitch-viewer{
+    max-height: 4000px;
+    opacity: 1;
+    margin-top: 22px;
+  }
+  .viewer-head{
+    display: flex;
+    align-items: baseline;
+    gap: 6px 16px;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(228,213,168,0.25);
+  }
+  .viewer-sub{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gold-soft);
+  }
+  .viewer-close{
+    margin-left: auto;
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gold-soft);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+  .viewer-close:hover{ color: #fff; }
+  .pitch-frame{
+    display: block;
+    width: 100%;
+    height: 78vh;
+    min-height: 480px;
+    border: 0;
+    background: #fff;
   }
 
   /* ---- Code tabs & panels ---- */
@@ -355,14 +416,6 @@
     font-family: var(--code);
     font-size: 12.5px;
     color: var(--gold-soft);
-  }
-  .panel-body.analysis-body p{
-    margin: 0;
-    padding: 16px 18px;
-    font-size: 14px;
-    line-height: 1.65;
-    color: #DCE1EA;
-    font-family: var(--body);
   }
 
   /* ---- Skills ---- */
@@ -496,7 +549,15 @@
           valuation against strategic acquirers.
         </p>
         <div class="featured-actions">
-          <a class="pitch-btn" href="transmedics-pitch-deck.pdf" target="_blank" rel="noopener">View pitch deck ↗</a>
+          <button class="pitch-btn" type="button" id="pitch-toggle" aria-expanded="false">View pitch deck</button>
+          <a class="viewer-link" href="transmedics-pitch-deck.pdf" target="_blank" rel="noopener">Open in new tab ↗</a>
+        </div>
+        <div class="pitch-viewer">
+          <div class="viewer-head">
+            <span class="viewer-sub">TransMedics (TMDX) — Acquisition Pitch</span>
+            <button class="viewer-close" type="button" aria-label="Close">✕</button>
+          </div>
+          <iframe class="pitch-frame" data-src="transmedics-pitch-deck.pdf" title="TransMedics pitch deck"></iframe>
         </div>
       </div>
     </section>
@@ -514,7 +575,6 @@
           <div class="stack">Python · yfinance · Tableau</div>
           <div class="code-row">
             <button class="code-tab" type="button" data-panel="comps-panel"><span class="chev">▸</span> View code</button>
-            <button class="code-tab" type="button" data-panel="comps-analysis"><span class="chev">▸</span> Analysis</button>
             <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
           <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py">
@@ -524,21 +584,6 @@
             </div>
             <div class="panel-body">
               <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
-            </div>
-          </div>
-          <div class="code-panel" id="comps-analysis">
-            <div class="panel-head">
-              <span class="panel-sub">The approach behind the pipeline.</span>
-              <button class="panel-close" type="button" data-panel="comps-analysis" aria-label="Close">✕</button>
-            </div>
-            <div class="panel-body analysis-body">
-              <p>
-                A comp table is only as good as the day it was built. This pipeline pulls
-                fundamentals straight from yfinance, computes EV/EBITDA, EV/Sales and P/E across the
-                peer set, then prices the target against the 25th–75th percentile band — so the
-                multiple is live, not a screenshot. The output feeds a Tableau view that turns the
-                band into a quick buy/sell read.
-              </p>
             </div>
           </div>
         </div>
@@ -552,7 +597,6 @@
           <div class="stack">Python · Pandas · OLS Regression</div>
           <div class="code-row">
             <button class="code-tab" type="button" data-panel="gas-panel"><span class="chev">▸</span> View code</button>
-            <button class="code-tab" type="button" data-panel="gas-analysis"><span class="chev">▸</span> Analysis</button>
             <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
           <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py">
@@ -562,20 +606,6 @@
             </div>
             <div class="panel-body">
               <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
-            </div>
-          </div>
-          <div class="code-panel" id="gas-analysis">
-            <div class="panel-head">
-              <span class="panel-sub">The approach behind the pipeline.</span>
-              <button class="panel-close" type="button" data-panel="gas-analysis" aria-label="Close">✕</button>
-            </div>
-            <div class="panel-body analysis-body">
-              <p>
-                When TTF gas spikes, how much is weather and how much is market structure? Three
-                years of European gas prices are regressed against regional Heating Degree Days, and
-                the OLS residuals beyond 2-sigma isolate the moves that weather alone can't explain —
-                the non-weather supply shocks worth flagging.
-              </p>
             </div>
           </div>
         </div>
@@ -767,6 +797,23 @@
         card.style.transform = "";
       });
     });
+
+    var featured = document.querySelector(".featured");
+    var pitchToggle = document.getElementById("pitch-toggle");
+    var pitchClose = document.querySelector(".viewer-close");
+    var pitchFrame = document.querySelector(".pitch-frame");
+    if (featured && pitchToggle && pitchFrame) {
+      function setViewer(open) {
+        featured.classList.toggle("viewer-open", open);
+        pitchToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        pitchToggle.textContent = open ? "Hide pitch deck" : "View pitch deck";
+        if (open && !pitchFrame.src) pitchFrame.src = pitchFrame.dataset.src;
+      }
+      pitchToggle.addEventListener("click", function () {
+        setViewer(!featured.classList.contains("viewer-open"));
+      });
+      if (pitchClose) pitchClose.addEventListener("click", function () { setViewer(false); });
+    }
   })();
 </script>
 
