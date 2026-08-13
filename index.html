@@ -204,7 +204,7 @@
     color: var(--ink-soft);
   }
 
-  /* ---- Code dropdown ---- */
+  /* ---- Code tabs & panels ---- */
   .code-row{
     display: flex;
     flex-wrap: wrap;
@@ -212,11 +212,8 @@
     gap: 14px;
     margin-top: 18px;
   }
-  .code-drop{
-    min-width: 0;
-  }
-  .code-drop summary{
-    list-style: none;
+  .code-tab{
+    appearance: none;
     cursor: pointer;
     user-select: none;
     display: inline-flex;
@@ -233,13 +230,12 @@
     border-left: 3px solid var(--gold);
     transition: background 0.2s ease, border-color 0.2s ease;
   }
-  .code-drop summary::-webkit-details-marker{display:none;}
-  .code-drop summary:hover{
+  .code-tab:hover{
     background: #1B2B4D;
     border-color: var(--gold);
   }
-  .code-drop summary .chev{ transition: transform 0.2s ease; }
-  .code-drop[open] summary .chev{ transform: rotate(90deg); }
+  .code-tab .chev{ transition: transform 0.2s ease; }
+  .code-tab.open .chev{ transform: rotate(90deg); }
   .repo-link{
     font-family: var(--mono);
     font-size: 12.5px;
@@ -250,14 +246,46 @@
   }
   .repo-link:hover{ color: var(--gold); border-color: var(--gold); }
   .code-panel{
-    margin-top: 14px;
+    margin-top: 16px;
     background: var(--ink);
     border-left: 3px solid var(--gold);
+  }
+  .panel-head{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 16px;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(228,213,168,0.25);
+  }
+  .panel-title{
+    font-family: var(--display);
+    font-size: 16px;
+    color: #fff;
+  }
+  .panel-sub{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gold-soft);
+  }
+  .panel-close{
+    margin-left: auto;
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gold-soft);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 4px 8px;
+  }
+  .panel-close:hover{ color: #fff; }
+  .panel-body{
     max-height: 420px;
     overflow: auto;
     min-width: 0;
   }
-  .code-panel pre{
+  .panel-body pre{
     font-family: var(--code);
     font-size: 12.5px;
     line-height: 1.55;
@@ -266,15 +294,14 @@
     tab-size: 4;
     max-width: 100%;
   }
-  .code-panel code{
+  .panel-body code{
     font-family: var(--code);
     background: none;
   }
-  .code-panel .code-msg{
+  .panel-body .code-msg{
     font-family: var(--code);
     font-size: 12.5px;
     color: var(--gold-soft);
-    padding: 16px 18px;
   }
 
   /* ---- Skills ---- */
@@ -351,11 +378,9 @@
     <section id="about">
       <div class="section-head"><span class="section-num">01</span><h2>About</h2></div>
       <p class="about-text">
-        I study <strong>Philosophy, Politics & Economics</strong> at the University of York, where the pull toward
-        rigorous argument meets a pull toward markets. Most of my work lives at that intersection: turning messy
-        data into a defensible thesis, whether that's a stock pitch for a <strong>£40,000 student-led fund</strong>
-        or a dashboard a client actually uses. I build the pipelines myself where I can — Python over spreadsheets
-        when the question is big enough to warrant it.
+        I study <strong>Philosophy, Politics & Economics</strong> at York — rigorous argument meets markets.
+        I turn messy data into a defensible thesis, from a <strong>£40,000 student-led fund</strong> stock pitch
+        to dashboards clients actually use. Python over spreadsheets when the question is big enough to warrant it.
       </p>
     </section>
 
@@ -406,18 +431,12 @@
           <div class="project-tag">Valuation Pipeline</div>
           <h3>Automated Comparable Company Analysis</h3>
           <p>
-            A Python pipeline using yfinance to pull fundamentals, calculate Enterprise Values, and compute
-            EV/EBITDA, EV/Sales, and P/E multiples — with peer benchmarking logic that outputs 25th/75th
-            percentile valuation bands into interactive Tableau dashboards.
+            Python pipeline that pulls fundamentals, computes EV/EBITDA, EV/Sales and P/E, and prices a
+            target against 25th–75th percentile peer bands in Tableau.
           </p>
           <div class="stack">Python · yfinance · Tableau</div>
           <div class="code-row">
-            <details class="code-drop" id="comps-drop" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py">
-              <summary><span class="chev">▸</span> View code</summary>
-              <div class="code-panel">
-                <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
-              </div>
-            </details>
+            <button class="code-tab" type="button" data-panel="comps-panel"><span class="chev">▸</span> View code</button>
             <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
         </div>
@@ -425,20 +444,36 @@
           <div class="project-tag">Market Model</div>
           <h3>European Gas Volatility & Weather Correlation</h3>
           <p>
-            Three years of European TTF gas price dynamics set against regional weather data. Calculated
-            Heating Degree Days and ran OLS regression to isolate 2-sigma price residuals and flag
-            non-weather supply shocks.
+            Three years of TTF gas prices set against regional weather — Heating Degree Days and OLS
+            regressions to isolate 2-sigma residuals and flag non-weather supply shocks.
           </p>
           <div class="stack">Python · Pandas · OLS Regression</div>
           <div class="code-row">
-            <details class="code-drop" id="gas-drop" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py">
-              <summary><span class="chev">▸</span> View code</summary>
-              <div class="code-panel">
-                <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
-              </div>
-            </details>
+            <button class="code-tab" type="button" data-panel="gas-panel"><span class="chev">▸</span> View code</button>
             <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
+        </div>
+      </div>
+
+      <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py" hidden>
+        <div class="panel-head">
+          <span class="panel-title">Automated Comparable Company Analysis</span>
+          <span class="panel-sub">Prices a target against peer valuation bands from live fundamentals.</span>
+          <button class="panel-close" type="button" data-panel="comps-panel" aria-label="Close">✕</button>
+        </div>
+        <div class="panel-body">
+          <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+        </div>
+      </div>
+
+      <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py" hidden>
+        <div class="panel-head">
+          <span class="panel-title">European Gas Volatility &amp; Weather Correlation</span>
+          <span class="panel-sub">Isolates non-weather supply shocks via 2-sigma price residuals.</span>
+          <button class="panel-close" type="button" data-panel="gas-panel" aria-label="Close">✕</button>
+        </div>
+        <div class="panel-body">
+          <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
         </div>
       </div>
     </section>
@@ -483,29 +518,57 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
   (function () {
-    var drops = document.querySelectorAll("details.code-drop[data-src]");
-    for (var i = 0; i < drops.length; i++) {
-      (function (drop) {
-        var code = drop.querySelector("code");
-        drop.addEventListener("toggle", function () {
-          if (!drop.open || drop.dataset.loaded === "1") return;
-          drop.dataset.loaded = "1";
-          fetch(drop.dataset.src, { cache: "no-store" })
-            .then(function (res) {
-              if (!res.ok) throw new Error("HTTP " + res.status);
-              return res.text();
-            })
-            .then(function (src) {
-              code.textContent = src;
-              if (window.hljs) hljs.highlightElement(code);
-            })
-            .catch(function (err) {
-              code.innerHTML = '<span class="code-msg">Could not load code from GitHub: ' + err.message + "</span>";
-              drop.dataset.loaded = "";
-            });
+    var tabs = document.querySelectorAll(".code-tab");
+    var closeBtns = document.querySelectorAll(".panel-close");
+    var panels = document.querySelectorAll(".code-panel");
+
+    function loadCode(panel) {
+      if (panel.dataset.loaded === "1") return;
+      panel.dataset.loaded = "1";
+      var code = panel.querySelector("code");
+      fetch(panel.dataset.src, { cache: "no-store" })
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.text();
+        })
+        .then(function (src) {
+          code.textContent = src;
+          if (window.hljs) hljs.highlightElement(code);
+        })
+        .catch(function (err) {
+          code.innerHTML = '<span class="code-msg">Could not load code from GitHub: ' + err.message + "</span>";
+          panel.dataset.loaded = "";
         });
-      })(drops[i]);
     }
+
+    function closeAll() {
+      panels.forEach(function (p) { p.hidden = true; });
+      tabs.forEach(function (t) { t.classList.remove("open"); });
+    }
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var panel = document.getElementById(tab.dataset.panel);
+        if (!panel) return;
+        var wasOpen = !panel.hidden;
+        closeAll();
+        if (!wasOpen) {
+          panel.hidden = false;
+          tab.classList.add("open");
+          loadCode(panel);
+        }
+      });
+    });
+
+    closeBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var panel = document.getElementById(btn.dataset.panel);
+        if (panel) panel.hidden = true;
+        tabs.forEach(function (t) {
+          if (t.dataset.panel === btn.dataset.panel) t.classList.remove("open");
+        });
+      });
+    });
   })();
 </script>
 
