@@ -7,10 +7,11 @@
 <script>
   (function () {
     document.documentElement.classList.add("js");
+    var THEMES = ["light", "dark", "regatta", "lagoon", "guild", "glacier"];
     var t = null;
     try { t = localStorage.getItem("db-theme"); } catch (e) {}
-    if (!t && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) t = "dark";
-    if (t) document.documentElement.setAttribute("data-theme", t);
+    if (!t || THEMES.indexOf(t) === -1) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", t);
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,6 +43,50 @@
     --accent: #D2A63C;
     --accent-soft: #E4D5A8;
     --line: rgba(232,227,214,0.14);
+  }
+  html[data-theme="regatta"]{
+    --bg: #F2E2C4;
+    --bg-dim: #E9D5AC;
+    --fg: #223D71;
+    --fg-soft: #42588C;
+    --panel: #223D71;
+    --panel-hover: #2C4E85;
+    --accent: #1F5E93;
+    --accent-soft: #DCCB9F;
+    --line: rgba(34,61,113,0.16);
+  }
+  html[data-theme="lagoon"]{
+    --bg: #F7F4E8;
+    --bg-dim: #ECE7D4;
+    --fg: #1A1E19;
+    --fg-soft: #4C514A;
+    --panel: #1A1E19;
+    --panel-hover: #2A2F28;
+    --accent: #1C8B9B;
+    --accent-soft: #BFE3E8;
+    --line: rgba(26,30,25,0.14);
+  }
+  html[data-theme="guild"]{
+    --bg: #F9F2EA;
+    --bg-dim: #EFE3D2;
+    --fg: #213A34;
+    --fg-soft: #42574F;
+    --panel: #1C342D;
+    --panel-hover: #264238;
+    --accent: #154CA2;
+    --accent-soft: #D7E0EE;
+    --line: rgba(33,58,52,0.16);
+  }
+  html[data-theme="glacier"]{
+    --bg: #0A76B2;
+    --bg-dim: #0C69A4;
+    --fg: #F4FAFB;
+    --fg-soft: #D8ECF2;
+    --panel: #0A5688;
+    --panel-hover: #0F63A0;
+    --accent: #FFFFFF;
+    --accent-soft: #C5DFE3;
+    --line: rgba(244,250,251,0.22);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -382,7 +427,7 @@
   .repo-link:hover{ color: var(--accent); border-color: var(--accent); }
   .code-panel{
     margin-top: 16px;
-    background: var(--panel);
+    background: #0B1220;
     border-left: 3px solid var(--accent);
     max-height: 0;
     opacity: 0;
@@ -554,6 +599,62 @@
     transition: color 0.2s ease, border-color 0.2s ease, transform 0.3s ease;
   }
   .theme-toggle:hover{ color: var(--accent); border-color: var(--accent); transform: rotate(20deg); }
+  .theme-wrap{ position: relative; }
+  .theme-menu{
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    min-width: 168px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 101;
+  }
+  .theme-wrap.open .theme-menu{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .theme-opt{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--fg);
+    padding: 7px 9px;
+    border-radius: 7px;
+    text-align: left;
+    transition: background-color 0.15s ease;
+  }
+  .theme-opt:hover{ background: var(--bg-dim); }
+  .theme-opt .swatch{
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    flex: none;
+    background: linear-gradient(135deg, var(--s1, var(--bg)) 50%, var(--s2, var(--accent)) 50%);
+  }
+  .theme-opt .check{
+    margin-left: auto;
+    color: var(--accent);
+    visibility: hidden;
+    font-size: 13px;
+  }
+  .theme-opt.active .check{ visibility: visible; }
+  .theme-opt.active{ color: var(--accent); }
   .progress{
     position: absolute;
     left: 0;
@@ -750,7 +851,18 @@
         <a href="#projects" data-nav="projects">Projects</a>
         <a href="#skills" data-nav="skills">Skills</a>
       </div>
-      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle colour theme" title="Toggle colour theme"><span id="theme-icon">☾</span></button>
+      <div class="theme-wrap">
+        <button class="theme-toggle" id="theme-picker" type="button" aria-label="Choose colour theme" aria-haspopup="listbox" aria-expanded="false" title="Theme"><span id="theme-icon">◐</span></button>
+        <div class="theme-menu" id="theme-menu" role="listbox" aria-label="Colour themes">
+          <button class="theme-opt" type="button" role="option" data-theme="system"><span class="swatch" style="--s1:#F4F3EE;--s2:#12213B"></span>System<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="light"><span class="swatch" style="--s1:#F4F3EE;--s2:#B8912E"></span>Light<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="dark"><span class="swatch" style="--s1:#0B1220;--s2:#D2A63C"></span>Dark<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="regatta"><span class="swatch" style="--s1:#F2E2C4;--s2:#1F5E93"></span>Regatta<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="lagoon"><span class="swatch" style="--s1:#F7F4E8;--s2:#1C8B9B"></span>Lagoon<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="guild"><span class="swatch" style="--s1:#F9F2EA;--s2:#154CA2"></span>Guild<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="glacier"><span class="swatch" style="--s1:#0A76B2;--s2:#FFFFFF"></span>Glacier<span class="check">✓</span></button>
+        </div>
+      </div>
     </div>
     <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
   </nav>
@@ -1169,17 +1281,58 @@
       });
     });
 
-    var themeBtn = document.getElementById("theme-toggle");
+    var picker = document.getElementById("theme-picker");
+    var menu = document.getElementById("theme-menu");
     var themeIcon = document.getElementById("theme-icon");
+    var DARK_ISH = { dark: 1, glacier: 1 };
     function currentTheme() { return document.documentElement.getAttribute("data-theme") || "light"; }
-    function renderThemeIcon() { if (themeIcon) themeIcon.textContent = currentTheme() === "dark" ? "☀" : "☾"; }
-    renderThemeIcon();
-    if (themeBtn) {
-      themeBtn.addEventListener("click", function () {
-        var next = currentTheme() === "dark" ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", next);
-        try { localStorage.setItem("db-theme", next); } catch (e) {}
-        renderThemeIcon();
+    function storedTheme() { try { return localStorage.getItem("db-theme"); } catch (e) { return null; } }
+    function isSystem() { return !storedTheme(); }
+    function renderThemeUI() {
+      var t = currentTheme();
+      if (themeIcon) themeIcon.textContent = DARK_ISH[t] ? "☀" : "☾";
+      var active = isSystem() ? "system" : t;
+      menu.querySelectorAll(".theme-opt").forEach(function (o) {
+        o.classList.toggle("active", o.dataset.theme === active);
+      });
+    }
+    function setTheme(name) {
+      if (name === "system") {
+        var base = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", base);
+        try { localStorage.removeItem("db-theme"); } catch (e) {}
+      } else {
+        document.documentElement.setAttribute("data-theme", name);
+        try { localStorage.setItem("db-theme", name); } catch (e) {}
+      }
+      renderThemeUI();
+    }
+    renderThemeUI();
+    if (picker && menu) {
+      picker.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var open = menu.parentElement.classList.toggle("open");
+        picker.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      document.addEventListener("click", function (e) {
+        if (menu.parentElement.classList.contains("open") && !menu.parentElement.contains(e.target)) {
+          menu.parentElement.classList.remove("open");
+          picker.setAttribute("aria-expanded", "false");
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && menu.parentElement.classList.contains("open")) {
+          menu.parentElement.classList.remove("open");
+          picker.setAttribute("aria-expanded", "false");
+          picker.focus();
+        }
+      });
+      menu.querySelectorAll(".theme-opt").forEach(function (o) {
+        o.addEventListener("click", function () {
+          setTheme(o.dataset.theme);
+          menu.parentElement.classList.remove("open");
+          picker.setAttribute("aria-expanded", "false");
+        });
       });
     }
 
