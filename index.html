@@ -209,6 +209,51 @@
     color: var(--ink-soft);
   }
 
+  /* ---- Featured ---- */
+  .featured{
+    background: var(--paper-dim);
+    border: 1px solid var(--gold);
+    padding: 34px 30px;
+  }
+  .featured-tag{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .featured h2{
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+  .featured p{
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 62ch;
+  }
+  .featured-actions{ margin-top: 22px; }
+  .pitch-btn{
+    display: inline-block;
+    background: var(--ink);
+    color: var(--gold-soft);
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 11px 18px;
+    border: 1px solid var(--ink);
+    border-left: 3px solid var(--gold);
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .pitch-btn:hover{
+    background: #1B2B4D;
+    border-color: var(--gold);
+  }
+
   /* ---- Code tabs & panels ---- */
   .code-row{
     display: flex;
@@ -259,7 +304,7 @@
     overflow: hidden;
     transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
   }
-  .project-card.card-open .code-panel{
+  .project-card .code-panel.panel-open{
     max-height: 5000px;
     opacity: 1;
   }
@@ -310,6 +355,14 @@
     font-family: var(--code);
     font-size: 12.5px;
     color: var(--gold-soft);
+  }
+  .panel-body.analysis-body p{
+    margin: 0;
+    padding: 16px 18px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #DCE1EA;
+    font-family: var(--body);
   }
 
   /* ---- Skills ---- */
@@ -432,8 +485,24 @@
       </div>
     </section>
 
+    <section id="featured">
+      <div class="section-head"><span class="section-num">03</span><h2>Featured</h2></div>
+      <div class="featured">
+        <div class="featured-tag">Investment Pitch · Griff Fund</div>
+        <h2>TransMedics (TMDX) — Acquisition Pitch</h2>
+        <p>
+          The stock pitch that won the fund's highest buy vote. Thesis on TransMedics and its
+          NRP organ-perfusion technology — TAM expansion, the logistics moat, and a scenario
+          valuation against strategic acquirers.
+        </p>
+        <div class="featured-actions">
+          <a class="pitch-btn" href="transmedics-pitch-deck.pdf" target="_blank" rel="noopener">View pitch deck ↗</a>
+        </div>
+      </div>
+    </section>
+
     <section id="projects">
-      <div class="section-head"><span class="section-num">03</span><h2>Projects</h2></div>
+      <div class="section-head"><span class="section-num">04</span><h2>Projects</h2></div>
       <div class="projects">
         <div class="project-card">
           <div class="project-tag">Valuation Pipeline</div>
@@ -445,6 +514,7 @@
           <div class="stack">Python · yfinance · Tableau</div>
           <div class="code-row">
             <button class="code-tab" type="button" data-panel="comps-panel"><span class="chev">▸</span> View code</button>
+            <button class="code-tab" type="button" data-panel="comps-analysis"><span class="chev">▸</span> Analysis</button>
             <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
           <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py">
@@ -454,6 +524,21 @@
             </div>
             <div class="panel-body">
               <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+            </div>
+          </div>
+          <div class="code-panel" id="comps-analysis">
+            <div class="panel-head">
+              <span class="panel-sub">The approach behind the pipeline.</span>
+              <button class="panel-close" type="button" data-panel="comps-analysis" aria-label="Close">✕</button>
+            </div>
+            <div class="panel-body analysis-body">
+              <p>
+                A comp table is only as good as the day it was built. This pipeline pulls
+                fundamentals straight from yfinance, computes EV/EBITDA, EV/Sales and P/E across the
+                peer set, then prices the target against the 25th–75th percentile band — so the
+                multiple is live, not a screenshot. The output feeds a Tableau view that turns the
+                band into a quick buy/sell read.
+              </p>
             </div>
           </div>
         </div>
@@ -467,6 +552,7 @@
           <div class="stack">Python · Pandas · OLS Regression</div>
           <div class="code-row">
             <button class="code-tab" type="button" data-panel="gas-panel"><span class="chev">▸</span> View code</button>
+            <button class="code-tab" type="button" data-panel="gas-analysis"><span class="chev">▸</span> Analysis</button>
             <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
           <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py">
@@ -478,12 +564,26 @@
               <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
             </div>
           </div>
+          <div class="code-panel" id="gas-analysis">
+            <div class="panel-head">
+              <span class="panel-sub">The approach behind the pipeline.</span>
+              <button class="panel-close" type="button" data-panel="gas-analysis" aria-label="Close">✕</button>
+            </div>
+            <div class="panel-body analysis-body">
+              <p>
+                When TTF gas spikes, how much is weather and how much is market structure? Three
+                years of European gas prices are regressed against regional Heating Degree Days, and
+                the OLS residuals beyond 2-sigma isolate the moves that weather alone can't explain —
+                the non-weather supply shocks worth flagging.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <section id="skills">
-      <div class="section-head"><span class="section-num">04</span><h2>Skills</h2></div>
+      <div class="section-head"><span class="section-num">05</span><h2>Skills</h2></div>
       <div class="skills-grid">
         <div class="skills-group">
           <h4>Financial Analysis</h4>
@@ -499,7 +599,7 @@
             <li>Python (Pandas, NumPy)</li>
             <li>SQL</li>
             <li>Tableau</li>
-            <li>Excel (Power Query, Pivot Tables)</li>
+            <li>Excel</li>
           </ul>
         </div>
         <div class="skills-group">
@@ -508,6 +608,7 @@
             <li>Refinitiv Workspace</li>
             <li>PowerPoint</li>
             <li>Git / GitHub</li>
+            <li>Ollama (local LLMs)</li>
           </ul>
         </div>
       </div>
@@ -529,6 +630,7 @@
     var grid = document.querySelector(".projects");
 
     function loadCode(panel) {
+      if (!panel.dataset.src) return;
       if (panel.dataset.loaded === "1") return;
       panel.dataset.loaded = "1";
       var code = panel.querySelector("code");
@@ -548,11 +650,11 @@
     }
 
     function isPanelOpen(panel) {
-      return panel.closest(".project-card").classList.contains("card-open");
+      return panel.classList.contains("panel-open");
     }
 
     function setPanel(panel, open) {
-      panel.closest(".project-card").classList.toggle("card-open", open);
+      panel.classList.toggle("panel-open", open);
       var tab = document.querySelector('.code-tab[data-panel="' + panel.id + '"]');
       if (tab) tab.classList.toggle("open", open);
     }
