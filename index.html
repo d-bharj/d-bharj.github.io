@@ -258,11 +258,6 @@
     padding: 12px 18px;
     border-bottom: 1px solid rgba(228,213,168,0.25);
   }
-  .panel-title{
-    font-family: var(--display);
-    font-size: 16px;
-    color: #fff;
-  }
   .panel-sub{
     font-family: var(--mono);
     font-size: 12px;
@@ -439,6 +434,15 @@
             <button class="code-tab" type="button" data-panel="comps-panel"><span class="chev">▸</span> View code</button>
             <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
+          <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py" hidden>
+            <div class="panel-head">
+              <span class="panel-sub">Prices a target against peer valuation bands from live fundamentals.</span>
+              <button class="panel-close" type="button" data-panel="comps-panel" aria-label="Close">✕</button>
+            </div>
+            <div class="panel-body">
+              <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+            </div>
+          </div>
         </div>
         <div class="project-card">
           <div class="project-tag">Market Model</div>
@@ -452,28 +456,15 @@
             <button class="code-tab" type="button" data-panel="gas-panel"><span class="chev">▸</span> View code</button>
             <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
-        </div>
-      </div>
-
-      <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py" hidden>
-        <div class="panel-head">
-          <span class="panel-title">Automated Comparable Company Analysis</span>
-          <span class="panel-sub">Prices a target against peer valuation bands from live fundamentals.</span>
-          <button class="panel-close" type="button" data-panel="comps-panel" aria-label="Close">✕</button>
-        </div>
-        <div class="panel-body">
-          <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
-        </div>
-      </div>
-
-      <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py" hidden>
-        <div class="panel-head">
-          <span class="panel-title">European Gas Volatility &amp; Weather Correlation</span>
-          <span class="panel-sub">Isolates non-weather supply shocks via 2-sigma price residuals.</span>
-          <button class="panel-close" type="button" data-panel="gas-panel" aria-label="Close">✕</button>
-        </div>
-        <div class="panel-body">
-          <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+          <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py" hidden>
+            <div class="panel-head">
+              <span class="panel-sub">Isolates non-weather supply shocks via 2-sigma price residuals.</span>
+              <button class="panel-close" type="button" data-panel="gas-panel" aria-label="Close">✕</button>
+            </div>
+            <div class="panel-body">
+              <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+            </div>
+          </div>
         </div>
       </div>
     </section>
