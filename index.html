@@ -166,12 +166,16 @@
   }
   .projects.has-open .project-card{ grid-column: 1 / -1; }
   @media (max-width: 680px){ .projects{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion: reduce){
+    .project-card, .code-panel{ transition: none; }
+  }
   .project-card{
     background: var(--paper-dim);
     border: 1px solid var(--line);
     padding: 26px;
     position:relative;
     min-width: 0;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .project-card::before{
     content:"";
@@ -250,6 +254,14 @@
     margin-top: 16px;
     background: var(--ink);
     border-left: 3px solid var(--gold);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+  .project-card.card-open .code-panel{
+    max-height: 5000px;
+    opacity: 1;
   }
   .panel-head{
     display: flex;
@@ -435,7 +447,7 @@
             <button class="code-tab" type="button" data-panel="comps-panel"><span class="chev">▸</span> View code</button>
             <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
-          <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py" hidden>
+          <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py">
             <div class="panel-head">
               <span class="panel-sub">Prices a target against peer valuation bands from live fundamentals.</span>
               <button class="panel-close" type="button" data-panel="comps-panel" aria-label="Close">✕</button>
@@ -457,7 +469,7 @@
             <button class="code-tab" type="button" data-panel="gas-panel"><span class="chev">▸</span> View code</button>
             <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
-          <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py" hidden>
+          <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py">
             <div class="panel-head">
               <span class="panel-sub">Isolates non-weather supply shocks via 2-sigma price residuals.</span>
               <button class="panel-close" type="button" data-panel="gas-panel" aria-label="Close">✕</button>
@@ -513,6 +525,7 @@
     var tabs = document.querySelectorAll(".code-tab");
     var closeBtns = document.querySelectorAll(".panel-close");
     var panels = document.querySelectorAll(".code-panel");
+    var cards = document.querySelectorAll(".project-card");
     var grid = document.querySelector(".projects");
 
     function loadCode(panel) {
@@ -534,35 +547,122 @@
         });
     }
 
-    function closeAll() {
-      panels.forEach(function (p) { p.hidden = true; });
-      tabs.forEach(function (t) { t.classList.remove("open"); });
-      if (grid) grid.classList.remove("has-open");
+    function isPanelOpen(panel) {
+      return panel.closest(".project-card").classList.contains("card-open");
+    }
+
+    function setPanel(panel, open) {
+      panel.closest(".project-card").classList.toggle("card-open", open);
+      var tab = document.querySelector('.code-tab[data-panel="' + panel.id + '"]');
+      if (tab) tab.classList.toggle("open", open);
+    }
+
+    function anyOpen() {
+      var i, open = false;
+      for (i = 0; i < panels.length; i++) if (isPanelOpen(panels[i])) open = true;
+      return open;
+    }
+
+    function rects() {
+      var i, r = [];
+      for (i = 0; i < cards.length; i++) {
+        var b = cards[i].getBoundingClientRect();
+        r.push({ w: b.width, x: b.left, y: b.top });
+      }
+      return r;
+    }
+
+    function reflowStacked(stacked) {
+      var first = rects(), i;
+      for (i = 0; i < cards.length; i++) cards[i].style.transition = "none";
+      grid.classList.toggle("has-open", stacked);
+      var last = rects();
+      for (i = 0; i < cards.length; i++) {
+        cards[i].style.width = first[i].w + "px";
+        cards[i].style.transform =
+          "translate(" + (first[i].x - last[i].x) + "px," + (first[i].y - last[i].y) + "px)";
+      }
+      void grid.offsetWidth;
+      for (i = 0; i < cards.length; i++) {
+        cards[i].style.transition = "";
+        cards[i].style.width = last[i].w + "px";
+        cards[i].style.transform = "";
+      }
+    }
+
+    function openPanel(panel) {
+      if (isPanelOpen(panel)) { closePanel(panel); return; }
+      if (grid.classList.contains("has-open")) {
+        panels.forEach(function (p) { if (p !== panel) setPanel(p, false); });
+        setPanel(panel, true);
+        loadCode(panel);
+        return;
+      }
+      panels.forEach(function (p) { if (p !== panel) setPanel(p, false); });
+      var first = rects(), i;
+      for (i = 0; i < cards.length; i++) cards[i].style.transition = "none";
+      panel.style.transition = "none";
+      grid.classList.add("has-open");
+      setPanel(panel, true);
+      var last = rects();
+      for (i = 0; i < cards.length; i++) {
+        cards[i].style.width = first[i].w + "px";
+        cards[i].style.transform =
+          "translate(" + (first[i].x - last[i].x) + "px," + (first[i].y - last[i].y) + "px)";
+      }
+      panel.style.maxHeight = "0";
+      panel.style.opacity = "0";
+      void grid.offsetWidth;
+      for (i = 0; i < cards.length; i++) {
+        cards[i].style.transition = "";
+        cards[i].style.width = last[i].w + "px";
+        cards[i].style.transform = "";
+      }
+      panel.style.transition = "";
+      panel.style.maxHeight = "";
+      panel.style.opacity = "";
+      loadCode(panel);
+    }
+
+    function closePanel(panel) {
+      if (!isPanelOpen(panel)) return;
+      var needReflow = grid.classList.contains("has-open");
+      var ran = false;
+      function finish() {
+        if (ran) return;
+        ran = true;
+        panel.removeEventListener("transitionend", onEnd);
+        if (needReflow && !anyOpen()) reflowStacked(false);
+      }
+      function onEnd(e) {
+        if (e.propertyName === "max-height") finish();
+      }
+      panel.addEventListener("transitionend", onEnd);
+      setTimeout(finish, 600);
+      setPanel(panel, false);
     }
 
     tabs.forEach(function (tab) {
       tab.addEventListener("click", function () {
         var panel = document.getElementById(tab.dataset.panel);
         if (!panel) return;
-        var wasOpen = !panel.hidden;
-        closeAll();
-        if (!wasOpen) {
-          panel.hidden = false;
-          tab.classList.add("open");
-          if (grid) grid.classList.add("has-open");
-          loadCode(panel);
-        }
+        if (isPanelOpen(panel)) closePanel(panel);
+        else openPanel(panel);
       });
     });
 
     closeBtns.forEach(function (btn) {
       btn.addEventListener("click", function () {
         var panel = document.getElementById(btn.dataset.panel);
-        if (panel) panel.hidden = true;
-        tabs.forEach(function (t) {
-          if (t.dataset.panel === btn.dataset.panel) t.classList.remove("open");
-        });
-        if (grid) grid.classList.remove("has-open");
+        if (panel) closePanel(panel);
+      });
+    });
+
+    cards.forEach(function (card) {
+      card.addEventListener("transitionend", function (e) {
+        if (e.propertyName !== "width" && e.propertyName !== "transform") return;
+        card.style.width = "";
+        card.style.transform = "";
       });
     });
   })();
