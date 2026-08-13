@@ -203,32 +203,47 @@
   }
 
   /* ---- Code dropdown ---- */
-  .code-drop{
+  .code-row{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
     margin-top: 18px;
   }
   .code-drop summary{
     list-style: none;
     cursor: pointer;
+    user-select: none;
     display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0 8px;
+    align-items: center;
+    gap: 8px;
+    background: var(--ink);
+    color: var(--gold-soft);
     font-family: var(--mono);
     font-size: 12.5px;
-    color: var(--gold);
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 2px;
-    user-select: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid var(--ink);
+    border-left: 3px solid var(--gold);
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
   .code-drop summary::-webkit-details-marker{display:none;}
-  .code-drop summary:hover{ border-color: var(--gold); }
+  .code-drop summary:hover{
+    background: #1B2B4D;
+    border-color: var(--gold);
+  }
   .code-drop summary .chev{ transition: transform 0.2s ease; }
   .code-drop[open] summary .chev{ transform: rotate(90deg); }
-  .code-drop summary a{
-    text-decoration: none;
+  .repo-link{
+    font-family: var(--mono);
+    font-size: 12.5px;
     color: var(--ink-soft);
+    text-decoration: none;
     border-bottom: 1px solid var(--line);
+    padding-bottom: 1px;
   }
-  .code-drop summary a:hover{ color: var(--gold); border-color: var(--gold); }
+  .repo-link:hover{ color: var(--gold); border-color: var(--gold); }
   .code-panel{
     margin-top: 14px;
     background: var(--ink);
@@ -389,16 +404,15 @@
             percentile valuation bands into interactive Tableau dashboards.
           </p>
           <div class="stack">Python · yfinance · Tableau</div>
-          <details class="code-drop" id="comps-drop">
-            <summary>
-              <span class="chev">▸</span>
-              View code
-              <a href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">github.com/d-bharj/auto-comparable-company-analysis ↗</a>
-            </summary>
-            <div class="code-panel">
-              <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
-            </div>
-          </details>
+          <div class="code-row">
+            <details class="code-drop" id="comps-drop">
+              <summary><span class="chev">▸</span> View code</summary>
+              <div class="code-panel">
+                <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+              </div>
+            </details>
+            <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
+          </div>
         </div>
         <div class="project-card">
           <div class="project-tag">Market Model</div>
