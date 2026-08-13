@@ -164,6 +164,7 @@
     align-items: start;
     gap: 20px;
   }
+  .projects.has-open .project-card{ grid-column: 1 / -1; }
   @media (max-width: 680px){ .projects{grid-template-columns:1fr;} }
   .project-card{
     background: var(--paper-dim);
@@ -512,6 +513,7 @@
     var tabs = document.querySelectorAll(".code-tab");
     var closeBtns = document.querySelectorAll(".panel-close");
     var panels = document.querySelectorAll(".code-panel");
+    var grid = document.querySelector(".projects");
 
     function loadCode(panel) {
       if (panel.dataset.loaded === "1") return;
@@ -535,6 +537,7 @@
     function closeAll() {
       panels.forEach(function (p) { p.hidden = true; });
       tabs.forEach(function (t) { t.classList.remove("open"); });
+      if (grid) grid.classList.remove("has-open");
     }
 
     tabs.forEach(function (tab) {
@@ -546,6 +549,7 @@
         if (!wasOpen) {
           panel.hidden = false;
           tab.classList.add("open");
+          if (grid) grid.classList.add("has-open");
           loadCode(panel);
         }
       });
@@ -558,6 +562,7 @@
         tabs.forEach(function (t) {
           if (t.dataset.panel === btn.dataset.panel) t.classList.remove("open");
         });
+        if (grid) grid.classList.remove("has-open");
       });
     });
   })();
