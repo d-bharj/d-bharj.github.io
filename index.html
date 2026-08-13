@@ -1273,12 +1273,16 @@
       var doc = document.documentElement;
       var max = doc.scrollHeight - window.innerHeight;
       if (progressBar) progressBar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + "%";
-      var y = window.scrollY + 96;
+      var y = window.scrollY + window.innerHeight * 0.4;
       var current = null;
+      var last = null;
       navLinks.forEach(function (l) {
         var sec = document.getElementById(l.getAttribute("data-nav"));
-        if (sec && sec.offsetTop <= y) current = l;
+        if (!sec) return;
+        last = l;
+        if (sec.offsetTop <= y) current = l;
       });
+      if (window.innerHeight + window.scrollY >= doc.scrollHeight - 4 && last) current = last;
       navLinks.forEach(function (l) { l.classList.toggle("active", l === current); });
     }
     var scTicking = false;
