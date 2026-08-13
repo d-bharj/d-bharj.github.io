@@ -405,7 +405,7 @@
           </p>
           <div class="stack">Python · yfinance · Tableau</div>
           <div class="code-row">
-            <details class="code-drop" id="comps-drop">
+            <details class="code-drop" id="comps-drop" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py">
               <summary><span class="chev">▸</span> View code</summary>
               <div class="code-panel">
                 <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
@@ -423,6 +423,15 @@
             non-weather supply shocks.
           </p>
           <div class="stack">Python · Pandas · OLS Regression</div>
+          <div class="code-row">
+            <details class="code-drop" id="gas-drop" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py">
+              <summary><span class="chev">▸</span> View code</summary>
+              <div class="code-panel">
+                <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+              </div>
+            </details>
+            <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
+          </div>
         </div>
       </div>
     </section>
@@ -467,26 +476,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
   (function () {
-    var drop = document.getElementById("comps-drop");
-    if (!drop) return;
-    drop.addEventListener("toggle", function () {
-      if (!drop.open || drop.dataset.loaded === "1") return;
-      drop.dataset.loaded = "1";
-      var code = document.getElementById("comps-code");
-      fetch("https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py", { cache: "no-store" })
-        .then(function (res) {
-          if (!res.ok) throw new Error("HTTP " + res.status);
-          return res.text();
-        })
-        .then(function (src) {
-          code.textContent = src;
-          if (window.hljs) hljs.highlightElement(code);
-        })
-        .catch(function (err) {
-          code.innerHTML = '<span class="code-msg">Could not load code from GitHub: ' + err.message + "</span>";
-          drop.dataset.loaded = "";
+    var drops = document.querySelectorAll("details.code-drop[data-src]");
+    for (var i = 0; i < drops.length; i++) {
+      (function (drop) {
+        var code = drop.querySelector("code");
+        drop.addEventListener("toggle", function () {
+          if (!drop.open || drop.dataset.loaded === "1") return;
+          drop.dataset.loaded = "1";
+          fetch(drop.dataset.src, { cache: "no-store" })
+            .then(function (res) {
+              if (!res.ok) throw new Error("HTTP " + res.status);
+              return res.text();
+            })
+            .then(function (src) {
+              code.textContent = src;
+              if (window.hljs) hljs.highlightElement(code);
+            })
+            .catch(function (err) {
+              code.innerHTML = '<span class="code-msg">Could not load code from GitHub: ' + err.message + "</span>";
+              drop.dataset.loaded = "";
+            });
         });
-    });
+      })(drops[i]);
+    }
   })();
 </script>
 
