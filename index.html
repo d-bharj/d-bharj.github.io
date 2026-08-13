@@ -189,6 +189,14 @@
     font-size: 19px;
     margin-bottom: 10px;
   }
+  .project-card h3 a{
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .project-card h3 a:hover{
+    color: var(--gold);
+    border-color: var(--gold);
+  }
   .project-card p{
     font-size: 14.5px;
     color: var(--ink-soft);
@@ -327,7 +335,7 @@
       <div class="projects">
         <div class="project-card">
           <div class="project-tag">Valuation Pipeline</div>
-          <h3>Automated Comparable Company Analysis</h3>
+          <h3><a href="https://github.com/d-bharj/d-bharj.github.io/blob/main/projects/comparable-analysis/main.py" target="_blank" rel="noopener">Automated Comparable Company Analysis</a></h3>
           <p>
             A Python pipeline using yfinance to pull fundamentals, calculate Enterprise Values, and compute
             EV/EBITDA, EV/Sales, and P/E multiples — with peer benchmarking logic that outputs 25th/75th
