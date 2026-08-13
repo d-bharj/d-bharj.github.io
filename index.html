@@ -212,6 +212,9 @@
     gap: 14px;
     margin-top: 18px;
   }
+  .code-drop{
+    min-width: 0;
+  }
   .code-drop summary{
     list-style: none;
     cursor: pointer;
@@ -252,6 +255,7 @@
     border-left: 3px solid var(--gold);
     max-height: 420px;
     overflow: auto;
+    min-width: 0;
   }
   .code-panel pre{
     font-family: var(--code);
@@ -260,6 +264,7 @@
     padding: 16px 18px;
     white-space: pre;
     tab-size: 4;
+    max-width: 100%;
   }
   .code-panel code{
     font-family: var(--code);
