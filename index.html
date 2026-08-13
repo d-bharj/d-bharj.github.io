@@ -7,7 +7,7 @@
 <script>
   (function () {
     document.documentElement.classList.add("js");
-    var THEMES = ["light", "dark", "regatta", "lagoon", "guild", "glacier"];
+    var THEMES = ["light", "dark", "regatta", "lagoon", "guild", "glacier", "retro-fuji", "retro-okinawa", "retro-citypop", "retro-wave"];
     var t = null;
     try { t = localStorage.getItem("db-theme"); } catch (e) {}
     if (!t || THEMES.indexOf(t) === -1) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
@@ -15,7 +15,7 @@
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Anton&family=Zen+Kaku+Gothic+New:wght@900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <style>
   :root{
@@ -87,6 +87,66 @@
     --accent: #FFFFFF;
     --accent-soft: #C5DFE3;
     --line: rgba(244,250,251,0.22);
+  }
+  html[data-theme="retro-fuji"]{
+    --bg: #F2EEE3;
+    --bg-dim: #E8E1CF;
+    --fg: #1E3A8A;
+    --fg-soft: #3E579F;
+    --panel: #1E3A8A;
+    --panel-hover: #2A4AB0;
+    --accent: #2AB4C4;
+    --accent-soft: #C3E9EA;
+    --line: rgba(30,58,138,0.18);
+    --poster: url("assets/retro/fuji.jpg");
+    --pop: #E0762E;
+    --shadow: rgba(30,58,138,0.22);
+    --card-bg: #FCF9F0;
+  }
+  html[data-theme="retro-okinawa"]{
+    --bg: #F2EEE3;
+    --bg-dim: #E8E1CF;
+    --fg: #1C2218;
+    --fg-soft: #4A5442;
+    --panel: #0E5E6C;
+    --panel-hover: #127082;
+    --accent: #1FB6C8;
+    --accent-soft: #BDE6EA;
+    --line: rgba(28,34,24,0.18);
+    --poster: url("assets/retro/okinawa.jpg");
+    --pop: #6C7A2F;
+    --shadow: rgba(28,34,24,0.22);
+    --card-bg: #FCF9F0;
+  }
+  html[data-theme="retro-citypop"]{
+    --bg: #F2EEE3;
+    --bg-dim: #E8E1CF;
+    --fg: #14345F;
+    --fg-soft: #3E5A86;
+    --panel: #14345F;
+    --panel-hover: #1C4278;
+    --accent: #F26B5E;
+    --accent-soft: #F6CFC8;
+    --line: rgba(20,52,95,0.18);
+    --poster: url("assets/retro/september-wind.jpg");
+    --pop: #2EC8D8;
+    --shadow: rgba(20,52,95,0.22);
+    --card-bg: #FCF9F0;
+  }
+  html[data-theme="retro-wave"]{
+    --bg: #F2EEE3;
+    --bg-dim: #E8E1CF;
+    --fg: #1B3A6B;
+    --fg-soft: #425E8A;
+    --panel: #1B3A6B;
+    --panel-hover: #224A85;
+    --accent: #2F9EA8;
+    --accent-soft: #C4E4E8;
+    --line: rgba(27,58,107,0.18);
+    --poster: url("assets/retro/ame-no-wednesday.jpg");
+    --pop: #FFFFFF;
+    --shadow: rgba(27,58,107,0.22);
+    --card-bg: #FCF9F0;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -487,6 +547,38 @@
     color: var(--accent-soft);
   }
 
+  /* ---- Dashboard panels (Tableau embed) ---- */
+  .dash-panel{
+    margin-top: 16px;
+    background: #fff;
+    border-left: 3px solid var(--accent);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  }
+  .dash-panel.panel-open{
+    max-height: 5000px;
+    opacity: 1;
+  }
+  .dash-panel .panel-head{
+    border-bottom: 1px solid var(--line);
+  }
+  .dash-panel .panel-sub{ color: var(--fg-soft); }
+  .dash-panel .panel-close{ color: var(--fg-soft); }
+  .dash-panel .panel-close:hover{ color: var(--accent); }
+  .dash-body{ min-width: 0; }
+  .dash-frame{
+    display: block;
+    width: 100%;
+    min-height: 460px;
+    border: 0;
+    background: #fff;
+  }
+  @media (max-width: 640px){
+    .dash-frame{ min-height: 380px; }
+  }
+
   /* ---- Skills ---- */
   .skills-grid{
     display:grid;
@@ -817,6 +909,260 @@
     .topnav-links a{ font-size: 11.5px; }
     .topnav-in{ gap: 12px; padding: 0 18px; }
   }
+
+  /* ============================================================
+     RETRO JAPAN TRAVEL themes — full-bleed hero + floating cards
+     ============================================================ */
+  .kanji{ display: none; }
+  .hero-poster{ display: none; }
+  [data-theme^="retro"] .kanji{ display: block; }
+  [data-theme^="retro"] .hero-poster{ display: block; }
+  [data-theme^="retro"] .grain{ opacity: 0.08; }
+  [data-theme^="retro"] ::selection{ background: var(--fg); color: var(--bg); }
+
+  [data-theme^="retro"] .topnav{
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    border-bottom: 2px solid var(--fg);
+  }
+  [data-theme^="retro"] .topnav-brand{
+    font-family: 'Anton', 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 17px;
+    letter-spacing: 0.03em;
+    color: var(--fg);
+  }
+  [data-theme^="retro"] .topnav-links a{
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 11px;
+  }
+
+  /* --- Hero: full-bleed editorial --- */
+  [data-theme^="retro"] .wrap > header{
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    max-width: none;
+    min-height: 74vh;
+    padding: 96px 28px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 2px solid var(--fg);
+  }
+  [data-theme^="retro"] .wrap > header::before{
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    background: var(--accent);
+    z-index: 0;
+  }
+  [data-theme^="retro"] .kanji{
+    position: absolute;
+    right: -0.06em;
+    bottom: -0.18em;
+    font-family: 'Zen Kaku Gothic New', 'IBM Plex Sans', sans-serif;
+    font-weight: 900;
+    font-size: clamp(9rem, 26vw, 22rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--accent);
+    opacity: 0.55;
+    z-index: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+  [data-theme^="retro"] .hero-poster{
+    position: absolute;
+    right: 28px;
+    bottom: 48px;
+    width: clamp(210px, 30vw, 360px);
+    aspect-ratio: 1 / 1;
+    background-image: var(--poster, var(--accent));
+    background-size: cover;
+    background-position: center;
+    border: 2px solid var(--fg);
+    box-shadow: 10px 10px 0 var(--shadow);
+    z-index: 1;
+  }
+  [data-theme^="retro"] .hero-poster::after{
+    content: "poster · 旅";
+    position: absolute;
+    left: -2px;
+    bottom: -30px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: var(--bg);
+    padding: 2px 6px;
+    border: 1px solid var(--fg);
+  }
+  [data-theme^="retro"] .eyebrow{
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    border: 2px solid var(--fg);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--fg);
+    background: var(--bg);
+  }
+  [data-theme^="retro"] .eyebrow::before{
+    content: "●";
+    color: var(--accent);
+    font-size: 8px;
+  }
+  [data-theme^="retro"] .wrap > header h1{
+    position: relative;
+    z-index: 0;
+    font-family: 'Anton', 'Newsreader', serif;
+    font-weight: 400;
+    font-size: clamp(4rem, 11vw, 9rem);
+    line-height: 0.86;
+    letter-spacing: 0.005em;
+    text-transform: uppercase;
+    max-width: 7ch;
+    margin: 26px 0 0 -16px;
+    color: var(--fg);
+  }
+  [data-theme^="retro"] .role{
+    position: relative;
+    z-index: 2;
+    font-style: normal;
+    font-size: 15.5px;
+    max-width: 44ch;
+    margin-top: 18px;
+    color: var(--fg-soft);
+  }
+  [data-theme^="retro"] .rotator{
+    position: relative;
+    z-index: 2;
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin-top: 14px;
+  }
+  [data-theme^="retro"] .hero-meta{
+    position: relative;
+    z-index: 2;
+    margin-top: 30px;
+    padding-top: 14px;
+    border-top: 2px solid var(--fg);
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    max-width: 46ch;
+  }
+  [data-theme^="retro"] .hero-meta a{ border-bottom: none; }
+  [data-theme^="retro"] .hero-meta a::after{ content: " ·"; color: var(--accent); }
+  [data-theme^="retro"] .hero-meta a:last-child::after{ content: ""; }
+
+  /* --- Floating-card sections --- */
+  [data-theme^="retro"] section{
+    background: var(--card-bg);
+    border: 2px solid var(--fg);
+    box-shadow: 8px 8px 0 var(--shadow);
+    padding: 34px 30px;
+    margin-top: 48px;
+  }
+  [data-theme^="retro"] #projects{
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 48px 0 0;
+  }
+  [data-theme^="retro"] .section-head{ margin-bottom: 26px; }
+  [data-theme^="retro"] section .section-head .ghost{
+    color: var(--accent);
+    opacity: 0.14;
+    font-size: clamp(80px, 13vw, 150px);
+  }
+  [data-theme^="retro"] .section-num{
+    font-family: 'Anton', 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+  }
+  [data-theme^="retro"] h2{
+    font-family: 'Anton', 'Newsreader', serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    font-size: 32px;
+  }
+  [data-theme^="retro"] .section-head h2::after{
+    background: var(--fg);
+    width: 52px;
+    height: 3px;
+    margin-top: 9px;
+  }
+  [data-theme^="retro"] .stats{ border-top: 2px solid var(--fg); }
+  [data-theme^="retro"] .stat-num{
+    font-family: 'Anton', 'Newsreader', serif;
+    font-weight: 400;
+  }
+  [data-theme^="retro"] .stat-label{ color: var(--fg-soft); }
+  [data-theme^="retro"] .featured{
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  /* --- Project window cards --- */
+  [data-theme^="retro"] .project-card{
+    background: var(--card-bg);
+    border: 2px solid var(--fg);
+    box-shadow: 8px 8px 0 var(--shadow);
+    padding: 26px;
+  }
+  [data-theme^="retro"] .project-card::before{
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 7px;
+    background: var(--accent);
+    border-bottom: 2px solid var(--fg);
+  }
+  [data-theme^="retro"] .project-tag{
+    display: inline-block;
+    border: 1.5px solid var(--accent);
+    color: var(--fg);
+    padding: 2px 8px;
+    letter-spacing: 0.14em;
+  }
+  [data-theme^="retro"] .stack{ color: var(--fg-soft); }
+
+  /* --- Footer: tracked caps + double rule --- */
+  [data-theme^="retro"] footer{
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 2px solid var(--fg);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 11px;
+  }
+  [data-theme^="retro"] footer::before{
+    content: "";
+    display: block;
+    height: 5px;
+    background: var(--accent);
+    margin-bottom: 18px;
+  }
+  [data-theme^="retro"] footer a{ border-bottom: none; }
+
   @media (prefers-reduced-motion: reduce){
     .ticker-track,
     .js .reveal,
@@ -826,6 +1172,8 @@
     .project-card,
     .card-inner,
     .code-panel,
+    .dash-panel,
+    .dash-frame,
     .pitch-viewer,
     .chev{
       transition: none !important;
@@ -861,6 +1209,10 @@
           <button class="theme-opt" type="button" role="option" data-theme="lagoon"><span class="swatch" style="--s1:#F7F4E8;--s2:#1C8B9B"></span>Lagoon<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="guild"><span class="swatch" style="--s1:#F9F2EA;--s2:#154CA2"></span>Guild<span class="check">✓</span></button>
           <button class="theme-opt" type="button" role="option" data-theme="glacier"><span class="swatch" style="--s1:#0A76B2;--s2:#FFFFFF"></span>Glacier<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="retro-fuji"><span class="swatch" style="--s1:#F2EEE3;--s2:#1E3A8A"></span>Retro Fuji<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="retro-okinawa"><span class="swatch" style="--s1:#F2EEE3;--s2:#0E5E6C"></span>Retro Okinawa<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="retro-citypop"><span class="swatch" style="--s1:#F2EEE3;--s2:#F26B5E"></span>Retro City Pop<span class="check">✓</span></button>
+          <button class="theme-opt" type="button" role="option" data-theme="retro-wave"><span class="swatch" style="--s1:#F2EEE3;--s2:#2F9EA8"></span>Retro Wave<span class="check">✓</span></button>
         </div>
       </div>
     </div>
@@ -886,6 +1238,8 @@
 
   <div class="wrap">
     <header>
+      <span class="kanji" aria-hidden="true">旅</span>
+      <div class="hero-poster" aria-hidden="true"></div>
       <div class="eyebrow reveal">Portfolio · Manchester, UK</div>
       <h1>Daniel Bhardwaj</h1>
       <p class="role reveal">PPE student building the case for decisions with data — equity research, valuation models, and the pipelines behind them.</p>
@@ -1008,6 +1362,7 @@
           <div class="repo-meta" data-repo="comps"></div>
           <div class="code-row">
             <button class="code-tab" type="button" data-panel="comps-panel"><span class="chev">▸</span> View code</button>
+            <button class="code-tab dash-tab" type="button" data-panel="comps-dash"><span class="chev">▸</span> Dashboard</button>
             <a class="repo-link" href="https://github.com/d-bharj/auto-comparable-company-analysis" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
           <div class="code-panel" id="comps-panel" data-src="https://raw.githubusercontent.com/d-bharj/auto-comparable-company-analysis/master/main.py">
@@ -1017,6 +1372,15 @@
             </div>
             <div class="panel-body">
               <pre><code id="comps-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+            </div>
+          </div>
+          <div class="dash-panel" id="comps-dash">
+            <div class="panel-head">
+              <span class="panel-sub">Peer valuation bands — EV/EBITDA, EV/Sales, P/E against the target.</span>
+              <button class="panel-close" type="button" data-panel="comps-dash" aria-label="Close">✕</button>
+            </div>
+            <div class="dash-body">
+              <iframe class="dash-frame" title="SaaS Enterprise Tech Valuation Dashboard" data-src="https://public.tableau.com/views/EnterpriseTechValuationDashboard/SaaSEnterpriseTechValuationDashboard:language=en-US&:display_count=n&:origin=viz_share_link&:embed=y" loading="lazy"></iframe>
             </div>
           </div>
           </div>
@@ -1034,6 +1398,7 @@
           <div class="repo-meta" data-repo="gas"></div>
           <div class="code-row">
             <button class="code-tab" type="button" data-panel="gas-panel"><span class="chev">▸</span> View code</button>
+            <button class="code-tab dash-tab" type="button" data-panel="gas-dash"><span class="chev">▸</span> Dashboard</button>
             <a class="repo-link" href="https://github.com/d-bharj/gas-price-weather-sensitivity-model" target="_blank" rel="noopener">Link to GitHub ↗</a>
           </div>
           <div class="code-panel" id="gas-panel" data-src="https://raw.githubusercontent.com/d-bharj/gas-price-weather-sensitivity-model/main/weather_gas_analysis.py">
@@ -1043,6 +1408,15 @@
             </div>
             <div class="panel-body">
               <pre><code id="gas-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+            </div>
+          </div>
+          <div class="dash-panel" id="gas-dash">
+            <div class="panel-head">
+              <span class="panel-sub">TTF price vs weather — 2-sigma residuals flagged as supply shocks.</span>
+              <button class="panel-close" type="button" data-panel="gas-dash" aria-label="Close">✕</button>
+            </div>
+            <div class="dash-body">
+              <iframe class="dash-frame" title="Gas Price Weather Sensitivity Model" data-src="https://public.tableau.com/views/GasPriceWeatherSensitivityModel/Dashboard1:language=en-US&:display_count=n&:origin=viz_share_link&:embed=y" loading="lazy"></iframe>
             </div>
           </div>
           </div>
@@ -1093,13 +1467,19 @@
   (function () {
     var tabs = document.querySelectorAll(".code-tab");
     var closeBtns = document.querySelectorAll(".panel-close");
-    var panels = document.querySelectorAll(".code-panel");
+    var panels = document.querySelectorAll(".code-panel, .dash-panel");
     var cards = document.querySelectorAll(".project-card");
     var grid = document.querySelector(".projects");
 
     function loadCode(panel) {
-      if (!panel.dataset.src) return;
       if (panel.dataset.loaded === "1") return;
+      var frame = panel.querySelector("iframe.dash-frame");
+      if (frame && frame.dataset.src) {
+        if (!frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
+        panel.dataset.loaded = "1";
+        return;
+      }
+      if (!panel.dataset.src) return;
       panel.dataset.loaded = "1";
       var code = panel.querySelector("code");
       fetch(panel.dataset.src, { cache: "no-store" })
