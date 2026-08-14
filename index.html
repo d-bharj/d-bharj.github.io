@@ -2211,6 +2211,8 @@
     pointer-events: none;
   }
   .sand-overlay canvas{
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     display: block;
@@ -2930,20 +2932,18 @@
     var fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
     var enabled = fine && !reduced;
 
-    var MAX_PARTICLES = 260;
-    var EMIT_GAP = 22;
-    var SPAWN_PER_TICK = 3;
-    var FRICTION = 0.86;
-    var STOP_SPEED = 14;
-    var SETTLE_MIN = 0.5;
-    var SETTLE_MAX = 1.3;
-    var FADE_MS = 550;
-    var GRAIN = 4.2;
+    var EMIT_GAP = 18;
+    var GRIP = 13;
+    var TRENCH = "rgba(105, 78, 44, 0.22)";
+    var DENT = "rgba(105, 78, 44, 0.32)";
+    var MOUND = 3.4;
+    var GRAIN = 3.2;
+    var MAX_PARTICLES = 160;
     var TONES = ["#A6782F", "#8F6423", "#B8863B", "#C9974A", "#7C5620"];
 
     var overlay = null;
-    var canvas = null;
-    var ctx = null;
+    var track = null;
+    var grains = null;
     var dpr = 1;
     var sprites = [];
     var parts = [];
@@ -2978,10 +2978,16 @@
     }
 
     function resize() {
-      if (!canvas) return;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(window.innerWidth * dpr);
-      canvas.height = Math.round(window.innerHeight * dpr);
+      if (!track || !grains) return;
+      var nd = Math.min(window.devicePixelRatio || 1, 2);
+      var w = Math.round(window.innerWidth * nd);
+      var h = Math.round(window.innerHeight * nd);
+      if (track.canvas.width === w && track.canvas.height === h && nd === dpr) return;
+      dpr = nd;
+      track.canvas.width = w;
+      track.canvas.height = h;
+      grains.canvas.width = w;
+      grains.canvas.height = h;
       makeSprites();
     }
 
@@ -2990,14 +2996,17 @@
         overlay = document.createElement("div");
         overlay.className = "sand-overlay";
         overlay.setAttribute("aria-hidden", "true");
-        canvas = document.createElement("canvas");
-        overlay.appendChild(canvas);
+        var tc = document.createElement("canvas");
+        var gc = document.createElement("canvas");
+        overlay.appendChild(tc);
+        overlay.appendChild(gc);
         document.body.appendChild(overlay);
-        ctx = canvas.getContext("2d");
+        track = tc.getContext("2d");
+        grains = gc.getContext("2d");
         window.addEventListener("resize", resize);
       }
       resize();
-      return ctx;
+      return track;
     }
 
     function isFuji() {
@@ -3007,7 +3016,10 @@
     function clearAll() {
       alive = 0;
       for (var i = 0; i < parts.length; i++) parts[i].dead = true;
-      if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (track && grains) {
+        track.clearRect(0, 0, track.canvas.width, track.canvas.height);
+        grains.clearRect(0, 0, grains.canvas.width, grains.canvas.height);
+      }
       if (raf) { cancelAnimationFrame(raf); raf = 0; }
       prevT = 0;
     }
@@ -3027,75 +3039,90 @@
       return oldest;
     }
 
-    function spawn(x, y, dx, dy, speed) {
-      var ang = Math.atan2(dy, dx);
-      var n = SPAWN_PER_TICK + (speed > 450 ? 1 : 0);
-      for (var i = 0; i < n; i++) {
-        var p = nextParticle();
-        if (p.dead) alive++;
-        p.dead = false;
-        var isBow = Math.random() < 0.26;
-        var a, sp;
-        if (isBow) {
-          a = ang + (Math.random() - 0.5) * 1.1;
-          sp = speed * (0.12 + Math.random() * 0.22);
-        } else {
-          a = ang + Math.PI + (Math.random() - 0.5) * 2.4;
-          sp = speed * (0.28 + Math.random() * 0.5);
+    function spawnGrain(x, y, ang, sp, ttl) {
+      var p = nextParticle();
+      if (p.dead) alive++;
+      p.dead = false;
+      p.x = x;
+      p.y = y;
+      p.vx = Math.cos(ang) * sp;
+      p.vy = Math.sin(ang) * sp;
+      p.s = GRAIN * (0.6 + Math.random() * 0.8) * dpr;
+      p.spr = (Math.random() * sprites.length) | 0;
+      p.age = 0;
+      p.ttl = ttl;
+      p.maxA = 0.9;
+    }
+
+    function mound(x, y) {
+      track.globalAlpha = 0.75 + Math.random() * 0.25;
+      var s = MOUND * (0.7 + Math.random() * 0.8) * dpr;
+      var spr = sprites[(Math.random() * sprites.length) | 0];
+      track.drawImage(spr, x * dpr - s / 2, y * dpr - s / 2, s, s);
+      track.globalAlpha = 1;
+    }
+
+    function emit(cx, cy, px, py, dx, dy) {
+      var dist = Math.hypot(dx, dy) || 1;
+      var nx = -dy / dist;
+      var ny = dx / dist;
+      var speed = Math.min(dist / EMIT_GAP * 60, 60);
+
+      track.strokeStyle = TRENCH;
+      track.lineWidth = GRIP * dpr;
+      track.lineCap = "round";
+      track.lineJoin = "round";
+      track.beginPath();
+      track.moveTo(px * dpr, py * dpr);
+      track.lineTo(cx * dpr, cy * dpr);
+      track.stroke();
+
+      var n = Math.round(1.5 + Math.min(speed / 22, 2.5));
+      for (var side = -1; side <= 1; side += 2) {
+        for (var k = 0; k < n; k++) {
+          var t = Math.random();
+          var bx = px + dx * t;
+          var by = py + dy * t;
+          var off = (GRIP / 2 + 1 + Math.random() * 6) * side;
+          mound(bx + nx * off + (Math.random() - 0.5) * 10,
+                by + ny * off + (Math.random() - 0.5) * 10);
         }
-        p.x = x + Math.cos(ang) * 5 + (Math.random() - 0.5) * 9;
-        p.y = y + Math.sin(ang) * 5 + (Math.random() - 0.5) * 9;
-        p.vx = Math.cos(a) * sp;
-        p.vy = Math.sin(a) * sp;
-        p.s = GRAIN * (0.5 + Math.random() * 0.9) * dpr;
-        p.spr = (Math.random() * sprites.length) | 0;
-        p.age = 0;
-        p.state = 0;
-        p.settleAt = 0;
-        p.fadeAt = 0;
-        p.maxA = 0.85 + Math.random() * 0.15;
-        p.alpha = p.maxA;
+      }
+
+      var ang = Math.atan2(dy, dx);
+      var sp = Math.min(speed, 28);
+      for (var f = 0; f < 2; f++) {
+        var a2 = Math.random() < 0.5
+          ? ang + (Math.random() - 0.5) * 1.2
+          : ang + Math.PI + (Math.random() - 0.5) * 1.4;
+        spawnGrain(cx, cy, a2, sp * (0.25 + Math.random() * 0.3), 0.5 + Math.random() * 0.5);
       }
     }
 
     function loop(now) {
       raf = requestAnimationFrame(loop);
-      if (!ctx) return;
+      if (!grains) return;
       if (!prevT) prevT = now;
       var dt = Math.min((now - prevT) / 1000, 0.05);
       prevT = now;
-      var f = Math.pow(FRICTION, dt * 60);
-      var st = now / 1000;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var f = Math.pow(0.9, dt * 60);
+      grains.clearRect(0, 0, grains.canvas.width, grains.canvas.height);
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
         if (p.dead) continue;
         p.age += dt;
-        if (p.state === 0) {
-          p.vx *= f;
-          p.vy *= f;
-          p.x += p.vx * dt;
-          p.y += p.vy * dt;
-          if (Math.hypot(p.vx, p.vy) < STOP_SPEED) {
-            p.state = 1;
-            p.settleAt = st + SETTLE_MIN + Math.random() * (SETTLE_MAX - SETTLE_MIN);
-          }
-        } else if (p.state === 1) {
-          if (st >= p.settleAt) {
-            p.state = 2;
-            p.fadeAt = st + FADE_MS / 1000;
-          }
-        } else {
-          if (st >= p.fadeAt) { p.dead = true; alive--; continue; }
-          p.alpha = p.maxA * (1 - (p.fadeAt - st) / (FADE_MS / 1000));
-        }
-        ctx.globalAlpha = Math.max(p.alpha, 0);
+        if (p.age >= p.ttl) { p.dead = true; alive--; continue; }
+        p.vx *= f;
+        p.vy *= f;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        grains.globalAlpha = Math.max(p.maxA * (1 - p.age / p.ttl), 0);
         var half = p.s / 2;
-        ctx.drawImage(sprites[p.spr], p.x * dpr - half, p.y * dpr - half, p.s, p.s);
+        grains.drawImage(sprites[p.spr], p.x * dpr - half, p.y * dpr - half, p.s, p.s);
       }
-      ctx.globalAlpha = 1;
+      grains.globalAlpha = 1;
       if (alive <= 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        grains.clearRect(0, 0, grains.canvas.width, grains.canvas.height);
         cancelAnimationFrame(raf);
         raf = 0;
         prevT = 0;
@@ -3120,24 +3147,30 @@
       }
       var dx = e.clientX - last.x;
       var dy = e.clientY - last.y;
-      var dtMs = Math.max(now - last.t, 1);
+      var px = last.x;
+      var py = last.y;
       last.x = e.clientX;
       last.y = e.clientY;
       last.t = now;
       if (now - lastEmit < EMIT_GAP) return;
       lastEmit = now;
-      var speed = Math.min(1400, Math.hypot(dx, dy) / dtMs * 1000) * 0.5;
-      if (speed < 40) return;
-      spawn(e.clientX, e.clientY, dx / dtMs * 1000, dy / dtMs * 1000, speed);
-      startLoop();
+      if (Math.hypot(dx, dy) < 1.5) return;
+      emit(e.clientX, e.clientY, px, py, dx, dy);
+      if (alive > 0) startLoop();
     }
 
     function onDown(e) {
       if (!isFuji() || e.pointerType === "touch") return;
       if (!ensureCanvas()) return;
-      spawn(e.clientX, e.clientY, 150, 150, 300);
-      spawn(e.clientX, e.clientY, -150, -150, 300);
-      startLoop();
+      track.fillStyle = DENT;
+      track.beginPath();
+      track.arc(e.clientX * dpr, e.clientY * dpr, 6 * dpr, 0, Math.PI * 2);
+      track.fill();
+      for (var i = 0; i < 12; i++) {
+        var a = (i / 12) * Math.PI * 2 + Math.random() * 0.4;
+        var r = 8 + Math.random() * 7;
+        mound(e.clientX + Math.cos(a) * r, e.clientY + Math.sin(a) * r);
+      }
     }
 
     if (enabled) {
