@@ -2203,39 +2203,17 @@
     [data-theme="news"] .topnav-links a + a::before{ margin: 0 9px; }
   }
 
-  /* ---- Retro Fuji: Hokusai Great Wave cursor trail ---- */
-  .wave-overlay{
+  /* ---- Retro Fuji: sand cursor trail ---- */
+  .sand-overlay{
     position: fixed;
     inset: 0;
     z-index: 2147482000;
     pointer-events: none;
-    overflow: hidden;
   }
-  .wave{
-    position: absolute;
-    width: 170px;
-    height: 95px;
-    margin-left: -150px;
-    margin-top: -45px;
-    opacity: 0.95;
-    transform: rotate(var(--r, 0deg)) scale(1);
-    transform-origin: 150px 45px;
-    transition: opacity 0.48s ease, transform 0.48s ease;
-    will-change: transform, opacity;
-  }
-  .wave.fading{
-    opacity: 0;
-    transform: rotate(var(--r, 0deg)) scale(0.55);
-  }
-  .wave svg{
+  .sand-overlay canvas{
     width: 100%;
     height: 100%;
     display: block;
-    overflow: visible;
-  }
-  .wave path{
-    fill: none;
-    stroke-linecap: round;
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -2951,116 +2929,218 @@
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
     var enabled = fine && !reduced;
-    var MAX_WAVES = 18;
-    var SPAWN_GAP = 38;
-    var HOLD = 120;
-    var FADE = 480;
+
+    var MAX_PARTICLES = 260;
+    var EMIT_GAP = 24;
+    var SPAWN_PER_TICK = 3;
+    var FRICTION = 0.86;
+    var STOP_SPEED = 14;
+    var SETTLE_MIN = 0.5;
+    var SETTLE_MAX = 1.3;
+    var FADE_MS = 550;
+    var GRAIN = 3.2;
+    var TONES = ["#C9A25B", "#B88A42", "#D8BB7C", "#9C7238", "#CBA76B"];
+
     var overlay = null;
-    var lastSpawn = 0;
+    var canvas = null;
+    var ctx = null;
+    var dpr = 1;
+    var sprites = [];
+    var parts = [];
     var last = null;
+    var lastEmit = 0;
+    var raf = 0;
+    var alive = 0;
+    var prevT = 0;
 
-    var GID = 0;
-
-    function smooth(points) {
-      var d = "";
-      for (var i = 0; i < points.length - 1; i++) {
-        var p0 = points[Math.max(i - 1, 0)];
-        var p1 = points[i];
-        var p2 = points[i + 1];
-        var p3 = points[Math.min(i + 2, points.length - 1)];
-        var c1x = p1.x + (p2.x - p0.x) / 6;
-        var c1y = p1.y + (p2.y - p0.y) / 6;
-        var c2x = p2.x - (p3.x - p1.x) / 6;
-        var c2y = p2.y - (p3.y - p1.y) / 6;
-        d += (i === 0 ? "M" + p1.x.toFixed(1) + "," + p1.y.toFixed(1) + " " : " ") +
-          "C" + c1x.toFixed(1) + "," + c1y.toFixed(1) + " " +
-          c2x.toFixed(1) + "," + c2y.toFixed(1) + " " +
-          p2.x.toFixed(1) + "," + p2.y.toFixed(1);
+    function makeSprites() {
+      sprites = [];
+      for (var i = 0; i < TONES.length; i++) {
+        var s = 9 * dpr;
+        var c = document.createElement("canvas");
+        c.width = c.height = s;
+        var g = c.getContext("2d");
+        g.fillStyle = TONES[i];
+        var n = 2 + (Math.random() * 3 | 0);
+        for (var j = 0; j < n; j++) {
+          g.beginPath();
+          g.arc(s * (0.2 + Math.random() * 0.6), s * (0.2 + Math.random() * 0.6), dpr * (1 + Math.random() * 0.7), 0, Math.PI * 2);
+          g.fill();
+        }
+        sprites.push(c);
       }
-      return d;
     }
 
-    function buildSvg() {
-      GID++;
-      var gid = "fuji-wave-" + GID;
-      var n = 4 + Math.floor(Math.random() * 3);
-      var base = 0.045 + Math.random() * 0.02;
-      var body = "";
-      for (var i = 0; i < n; i++) {
-        var len = 60 + Math.random() * 75;
-        var amp = 4 + Math.random() * 8;
-        var phase = Math.random() * Math.PI * 2;
-        var yEnd = (i - (n - 1) / 2) * (7 + Math.random() * 5);
-        var steps = 4 + Math.floor(Math.random() * 2);
-        var pts = [{ x: 146, y: 45 }];
-        for (var s = 1; s <= steps; s++) {
-          var t = s / steps;
-          var x = 146 - len * t;
-          var y = 45 + yEnd * t * t + amp * Math.sin((x + 8) * base + phase);
-          pts.push({ x: x, y: y });
-        }
-        body += '<path d="' + smooth(pts) + '" stroke-width="' + (1.5 + Math.random()).toFixed(2) + '"/>';
+    function resize() {
+      if (!canvas) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(window.innerWidth * dpr);
+      canvas.height = Math.round(window.innerHeight * dpr);
+      makeSprites();
+    }
+
+    function ensureCanvas() {
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.className = "sand-overlay";
+        overlay.setAttribute("aria-hidden", "true");
+        canvas = document.createElement("canvas");
+        overlay.appendChild(canvas);
+        document.body.appendChild(overlay);
+        ctx = canvas.getContext("2d");
+        window.addEventListener("resize", resize);
       }
-      return '<svg viewBox="0 0 170 95" aria-hidden="true">' +
-        '<defs><linearGradient id="' + gid + '" x1="150" y1="45" x2="12" y2="45" gradientUnits="userSpaceOnUse">' +
-        '<stop offset="0" stop-color="#1B3A6B"/>' +
-        '<stop offset="0.55" stop-color="#1B3A6B"/>' +
-        '<stop offset="1" stop-color="#1B3A6B" stop-opacity="0"/>' +
-        '</linearGradient></defs>' +
-        '<g stroke="url(#' + gid + ')" fill="none" stroke-linecap="round">' + body + '</g>' +
-        '</svg>';
+      resize();
+      return ctx;
     }
 
     function isFuji() {
       return document.documentElement.getAttribute("data-theme") === "retro-fuji";
     }
+
     function clearAll() {
-      if (overlay) {
-        while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+      alive = 0;
+      for (var i = 0; i < parts.length; i++) parts[i].dead = true;
+      if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (raf) { cancelAnimationFrame(raf); raf = 0; }
+      prevT = 0;
+    }
+
+    function nextParticle() {
+      var oldest = null, oAge = -1;
+      for (var i = 0; i < parts.length; i++) {
+        var q = parts[i];
+        if (q.dead) return q;
+        if (q.age > oAge) { oAge = q.age; oldest = q; }
+      }
+      if (parts.length < MAX_PARTICLES) {
+        var p = { dead: true };
+        parts.push(p);
+        return p;
+      }
+      return oldest;
+    }
+
+    function spawn(x, y, dx, dy, speed) {
+      var ang = Math.atan2(dy, dx);
+      var n = SPAWN_PER_TICK + (speed > 450 ? 1 : 0);
+      for (var i = 0; i < n; i++) {
+        var p = nextParticle();
+        if (p.dead) alive++;
+        p.dead = false;
+        var isBow = Math.random() < 0.26;
+        var a, sp;
+        if (isBow) {
+          a = ang + (Math.random() - 0.5) * 1.1;
+          sp = speed * (0.12 + Math.random() * 0.22);
+        } else {
+          a = ang + Math.PI + (Math.random() - 0.5) * 2.4;
+          sp = speed * (0.28 + Math.random() * 0.5);
+        }
+        p.x = x + Math.cos(ang) * 5 + (Math.random() - 0.5) * 9;
+        p.y = y + Math.sin(ang) * 5 + (Math.random() - 0.5) * 9;
+        p.vx = Math.cos(a) * sp;
+        p.vy = Math.sin(a) * sp;
+        p.s = GRAIN * (0.5 + Math.random() * 0.9) * dpr;
+        p.spr = (Math.random() * sprites.length) | 0;
+        p.age = 0;
+        p.state = 0;
+        p.settleAt = 0;
+        p.fadeAt = 0;
+        p.maxA = 0.75 + Math.random() * 0.2;
+        p.alpha = p.maxA;
       }
     }
-    function spawn(x, y, deg) {
-      if (!overlay) {
-        overlay = document.createElement("div");
-        overlay.className = "wave-overlay";
-        overlay.setAttribute("aria-hidden", "true");
-        document.body.appendChild(overlay);
+
+    function loop(now) {
+      raf = requestAnimationFrame(loop);
+      if (!ctx) return;
+      if (!prevT) prevT = now;
+      var dt = Math.min((now - prevT) / 1000, 0.05);
+      prevT = now;
+      var f = Math.pow(FRICTION, dt * 60);
+      var st = now / 1000;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i];
+        if (p.dead) continue;
+        p.age += dt;
+        if (p.state === 0) {
+          p.vx *= f;
+          p.vy *= f;
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          if (Math.hypot(p.vx, p.vy) < STOP_SPEED) {
+            p.state = 1;
+            p.settleAt = st + SETTLE_MIN + Math.random() * (SETTLE_MAX - SETTLE_MIN);
+          }
+        } else if (p.state === 1) {
+          if (st >= p.settleAt) {
+            p.state = 2;
+            p.fadeAt = st + FADE_MS / 1000;
+          }
+        } else {
+          if (st >= p.fadeAt) { p.dead = true; alive--; continue; }
+          p.alpha = p.maxA * (1 - (p.fadeAt - st) / (FADE_MS / 1000));
+        }
+        ctx.globalAlpha = Math.max(p.alpha, 0);
+        var half = p.s / 2;
+        ctx.drawImage(sprites[p.spr], p.x * dpr - half, p.y * dpr - half, p.s, p.s);
       }
-      while (overlay.childNodes.length >= MAX_WAVES) overlay.removeChild(overlay.firstChild);
-      var el = document.createElement("div");
-      el.className = "wave";
-      el.style.left = x + "px";
-      el.style.top = y + "px";
-      el.style.setProperty("--r", deg + "deg");
-      el.innerHTML = buildSvg();
-      overlay.appendChild(el);
-      setTimeout(function () {
-        el.classList.add("fading");
-        setTimeout(function () {
-          if (el.parentNode) el.parentNode.removeChild(el);
-        }, FADE + 60);
-      }, HOLD);
+      ctx.globalAlpha = 1;
+      if (alive <= 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        cancelAnimationFrame(raf);
+        raf = 0;
+        prevT = 0;
+      }
     }
+
+    function startLoop() {
+      if (!raf) {
+        prevT = 0;
+        raf = requestAnimationFrame(loop);
+      }
+    }
+
     function onMove(e) {
       if (!isFuji()) return;
+      if (!ensureCanvas()) return;
       var now = Date.now();
-      if (now - lastSpawn < SPAWN_GAP) return;
       if (!last || now - last.t > 150) {
-        lastSpawn = now;
         last = { x: e.clientX, y: e.clientY, t: now };
+        lastEmit = now;
         return;
       }
-      var deg = Math.atan2(e.clientY - last.y, e.clientX - last.x) * 180 / Math.PI;
-      lastSpawn = now;
-      last = { x: e.clientX, y: e.clientY, t: now };
-      spawn(e.clientX, e.clientY, deg);
+      var dx = e.clientX - last.x;
+      var dy = e.clientY - last.y;
+      var dtMs = Math.max(now - last.t, 1);
+      last.x = e.clientX;
+      last.y = e.clientY;
+      last.t = now;
+      if (now - lastEmit < EMIT_GAP) return;
+      lastEmit = now;
+      var speed = Math.min(1400, Math.hypot(dx, dy) / dtMs * 1000) * 0.5;
+      if (speed < 40) return;
+      spawn(e.clientX, e.clientY, dx / dtMs * 1000, dy / dtMs * 1000, speed);
+      startLoop();
+    }
+
+    function onDown(e) {
+      if (!isFuji() || e.pointerType === "touch") return;
+      if (!ensureCanvas()) return;
+      spawn(e.clientX, e.clientY, 150, 150, 300);
+      spawn(e.clientX, e.clientY, -150, -150, 300);
+      startLoop();
     }
 
     if (enabled) {
       document.addEventListener("pointermove", onMove, { passive: true });
+      document.addEventListener("pointerdown", onDown, { passive: true });
       var obs = new MutationObserver(function () {
         if (!isFuji()) {
           last = null;
+          lastEmit = 0;
           clearAll();
         }
       });
