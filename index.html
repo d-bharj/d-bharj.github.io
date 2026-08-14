@@ -2203,7 +2203,7 @@
     [data-theme="news"] .topnav-links a + a::before{ margin: 0 9px; }
   }
 
-  /* ---- Retro Fuji: water wake cursor trail ---- */
+  /* ---- Retro Fuji: Great Wave cursor wake ---- */
   .wake-svg{
     position: fixed;
     inset: 0;
@@ -2217,8 +2217,6 @@
   }
   .wake-svg path{
     fill: none;
-    stroke: #1E3A8A;
-    stroke-width: 2.2;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
@@ -2934,21 +2932,41 @@
 
   (function () {
     var NS = "http://www.w3.org/2000/svg";
-    var SEGS = 8;
-    var MAX_AGE = 1400;
+    var BANDS = 3;
+    var PERIOD = 115;
+    var LAMBDA = 160;
+    var AMP = 30;
+    var BAND_GAP = 9;
+    var CLAW_LEN = 46;
+    var CLAW_SEGS = 30;
+    var SPIRAL_TURNS = 2.4;
+    var DOTS = 14;
+    var HEAD_DOTS = 10;
+    var MAX_PTS = 260;
+    var MAX_AGE = 1700;
     var svg = null;
-    var segPaths = [];
-    var ripCircles = [];
+    var bandPaths = [];
+    var clawPath = null;
+    var tendrils = [];
+    var dotEls = [];
     var headEl = null;
     var pts = [];
-    var ripples = [];
     var cur = null;
     var lastPushed = null;
-    var lastRipple = 0;
     var running = false;
+    var dotSeed = [];
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
     var enabled = fine && !reduced;
+
+    var i;
+    for (i = 0; i < DOTS; i++) {
+      dotSeed.push({
+        a: Math.random() * Math.PI * 2,
+        r: 4 + Math.random() * 16,
+        sz: 1 + Math.random() * 1.6
+      });
+    }
 
     function isFuji() {
       return document.documentElement.getAttribute("data-theme") === "retro-fuji";
@@ -2958,67 +2976,75 @@
       var i;
       svg = document.createElementNS(NS, "svg");
       svg.setAttribute("class", "wake-svg");
-      for (i = 0; i < SEGS; i++) {
+      var widths = [2.6, 2.0, 1.5];
+      for (i = 0; i < BANDS; i++) {
         var p = document.createElementNS(NS, "path");
+        p.setAttribute("fill", "none");
+        p.setAttribute("stroke", "#1E3A8A");
+        p.setAttribute("stroke-width", widths[i]);
         p.setAttribute("stroke-opacity", "0");
         svg.appendChild(p);
-        segPaths.push(p);
+        bandPaths.push(p);
       }
-      for (i = 0; i < 6; i++) {
+      clawPath = document.createElementNS(NS, "path");
+      clawPath.setAttribute("fill", "none");
+      clawPath.setAttribute("stroke", "#1E3A8A");
+      clawPath.setAttribute("stroke-width", "3");
+      clawPath.setAttribute("stroke-opacity", "0");
+      svg.appendChild(clawPath);
+      for (i = 0; i < 3; i++) {
+        var t = document.createElementNS(NS, "path");
+        t.setAttribute("fill", "none");
+        t.setAttribute("stroke", "#1E3A8A");
+        t.setAttribute("stroke-width", "1.6");
+        t.setAttribute("stroke-opacity", "0");
+        svg.appendChild(t);
+        tendrils.push(t);
+      }
+      for (i = 0; i < DOTS; i++) {
         var c = document.createElementNS(NS, "circle");
-        c.setAttribute("fill", "none");
-        c.setAttribute("stroke", "#1E3A8A");
-        c.setAttribute("stroke-width", "1.4");
+        c.setAttribute("fill", i % 4 === 0 ? "#2AB4C4" : "#1E3A8A");
         c.setAttribute("opacity", "0");
         svg.appendChild(c);
-        ripCircles.push(c);
+        dotEls.push(c);
       }
       headEl = document.createElementNS(NS, "circle");
       headEl.setAttribute("fill", "#2AB4C4");
-      headEl.setAttribute("r", "2.4");
+      headEl.setAttribute("r", "3.5");
       headEl.setAttribute("opacity", "0");
       svg.appendChild(headEl);
       document.body.appendChild(svg);
     }
     function reset() {
       pts.length = 0;
-      ripples.length = 0;
       lastPushed = null;
       if (!svg) return;
       var i;
-      for (i = 0; i < segPaths.length; i++) segPaths[i].setAttribute("d", "");
-      for (i = 0; i < ripCircles.length; i++) {
-        ripCircles[i].setAttribute("r", "0");
-        ripCircles[i].setAttribute("opacity", "0");
-      }
+      for (i = 0; i < bandPaths.length; i++) bandPaths[i].setAttribute("d", "");
+      clawPath.setAttribute("d", "");
+      for (i = 0; i < tendrils.length; i++) tendrils[i].setAttribute("d", "");
+      for (i = 0; i < dotEls.length; i++) dotEls[i].setAttribute("opacity", "0");
       headEl.setAttribute("opacity", "0");
       svg.style.opacity = "0";
     }
-    function wavePts(raw) {
-      var n = raw.length;
-      var dist = new Array(n);
-      var i, dx, dy, len, nx, ny, amp, ph, off;
-      dist[0] = 0;
-      for (i = 1; i < n; i++) {
-        dist[i] = dist[i - 1] + Math.sqrt(
-          (raw[i].x - raw[i - 1].x) * (raw[i].x - raw[i - 1].x) +
-          (raw[i].y - raw[i - 1].y) * (raw[i].y - raw[i - 1].y));
+    function profile(s) {
+      var wave = Math.cos((s / PERIOD) * Math.PI * 2);
+      var bump = Math.max(0, wave);
+      return AMP * Math.exp(-s / LAMBDA) * bump * bump * bump;
+    }
+    function buildClaw(tip, T, N, len) {
+      var d = "";
+      for (var i = 0; i <= CLAW_SEGS; i++) {
+        var u = i / CLAW_SEGS;
+        var theta = Math.PI * (0.12 + u * (SPIRAL_TURNS * 2 + 0.35));
+        var r = len * (1 - u) * (1 - u * 0.35);
+        var dx = -T.x * Math.cos(theta) + N.x * Math.sin(theta);
+        var dy = -T.y * Math.cos(theta) + N.y * Math.sin(theta);
+        var px = tip.x + dx * r;
+        var py = tip.y + dy * r;
+        d += (i === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1);
       }
-      var out = [];
-      for (i = 0; i < n; i++) {
-        var p = raw[i];
-        if (i === 0) { dx = raw[1].x - raw[0].x; dy = raw[1].y - raw[0].y; }
-        else if (i === n - 1) { dx = p.x - raw[i - 1].x; dy = p.y - raw[i - 1].y; }
-        else { dx = raw[i + 1].x - raw[i - 1].x; dy = raw[i + 1].y - raw[i - 1].y; }
-        len = Math.sqrt(dx * dx + dy * dy) || 1;
-        nx = -dy / len;
-        ny = dx / len;
-        amp = 2 + (i / (n - 1)) * (i / (n - 1)) * 10;
-        ph = dist[i] * (Math.PI * 2 / 60);
-        off = amp * Math.sin(ph);
-        out.push({ x: p.x + nx * off, y: p.y + ny * off });
-      }
-      return out;
+      return d;
     }
     function onMove(e) {
       if (!isFuji()) {
@@ -3034,7 +3060,7 @@
     }
     function frame() {
       var now = Date.now();
-      var i;
+      var i, j;
       if (!running) return;
       if (!isFuji()) {
         running = false;
@@ -3049,29 +3075,10 @@
         }
       }
       while (pts.length && now - pts[0].t > MAX_AGE) pts.shift();
-      if (pts.length > 240) pts.splice(0, pts.length - 240);
+      if (pts.length > MAX_PTS) pts.splice(0, pts.length - MAX_PTS);
 
-      if (pts.length >= 2 && now - lastRipple > 240) {
-        lastRipple = now;
-        var hp = pts[pts.length - 1];
-        ripples.push({ x: hp.x, y: hp.y, t: now });
-      }
-      while (ripples.length && now - ripples[0].t > 900) ripples.shift();
-      for (i = 0; i < ripCircles.length; i++) {
-        var c = ripCircles[i];
-        if (i < ripples.length) {
-          var rp = ripples[ripples.length - 1 - i];
-          var age = (now - rp.t) / 900;
-          c.setAttribute("cx", rp.x.toFixed(1));
-          c.setAttribute("cy", rp.y.toFixed(1));
-          c.setAttribute("r", (4 + age * 22).toFixed(1));
-          c.setAttribute("opacity", (0.5 * (1 - age)).toFixed(2));
-        } else {
-          c.setAttribute("opacity", "0");
-        }
-      }
-
-      if (pts.length < 3) {
+      var n = pts.length;
+      if (n < 4) {
         if (!(cur && now - cur.t < 160)) {
           running = false;
           reset();
@@ -3081,26 +3088,104 @@
         return;
       }
 
-      var w = wavePts(pts);
-      var n = w.length;
-      for (i = 0; i < SEGS; i++) {
-        var p = segPaths[i];
-        var from = Math.max(0, n - 1 - Math.round((i + 1) * (n - 1) / SEGS));
-        var to = n - 1 - Math.round(i * (n - 1) / SEGS);
-        if (to - from < 1) {
-          p.setAttribute("d", "");
-          continue;
-        }
-        var d = "M" + w[from].x.toFixed(1) + " " + w[from].y.toFixed(1);
-        for (var j = from + 1; j <= to; j++) {
-          d += "L" + w[j].x.toFixed(1) + " " + w[j].y.toFixed(1);
-        }
-        p.setAttribute("d", d);
-        p.setAttribute("stroke-opacity", (0.85 * (1 - i / SEGS)).toFixed(2));
+      var dist = new Array(n);
+      dist[n - 1] = 0;
+      for (i = n - 2; i >= 0; i--) {
+        var ddx = pts[i].x - pts[i + 1].x;
+        var ddy = pts[i].y - pts[i + 1].y;
+        dist[i] = dist[i + 1] + Math.sqrt(ddx * ddx + ddy * ddy);
       }
-      headEl.setAttribute("cx", w[n - 1].x.toFixed(1));
-      headEl.setAttribute("cy", w[n - 1].y.toFixed(1));
-      headEl.setAttribute("opacity", "0.85");
+
+      var tx = new Array(n), ty = new Array(n);
+      var nx = new Array(n), ny = new Array(n);
+      for (i = 0; i < n; i++) {
+        var ax = pts[Math.max(0, i - 1)].x, ay = pts[Math.max(0, i - 1)].y;
+        var bx = pts[Math.min(n - 1, i + 1)].x, by = pts[Math.min(n - 1, i + 1)].y;
+        var vx = bx - ax, vy = by - ay;
+        var len = Math.sqrt(vx * vx + vy * vy) || 1;
+        tx[i] = vx / len; ty[i] = vy / len;
+        nx[i] = -ty[i]; ny[i] = tx[i];
+      }
+
+      for (j = 0; j < BANDS; j++) {
+        var d = "";
+        for (i = 0; i < n; i++) {
+          var off = profile(dist[i]) + j * BAND_GAP;
+          var px = pts[i].x + nx[i] * off;
+          var py = pts[i].y + ny[i] * off;
+          d += (i === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1);
+        }
+        bandPaths[j].setAttribute("d", d);
+        bandPaths[j].setAttribute("stroke-opacity", (0.95 - j * 0.24).toFixed(2));
+      }
+
+      var head = pts[n - 1];
+      var T = { x: tx[n - 1], y: ty[n - 1] };
+      var N = { x: nx[n - 1], y: ny[n - 1] };
+      var tipX = head.x + N.x * AMP;
+      var tipY = head.y + N.y * AMP;
+      clawPath.setAttribute("d", buildClaw({ x: tipX, y: tipY }, T, N, CLAW_LEN));
+      clawPath.setAttribute("stroke-opacity", "1");
+
+      var dirs = [
+        { a: -0.4, b: 0.5 },
+        { a: 0.0, b: 0.8 },
+        { a: 0.45, b: 0.55 }
+      ];
+      for (i = 0; i < tendrils.length; i++) {
+        var dd = dirs[i];
+        var vx = -T.x * Math.cos(dd.a) + N.x * Math.sin(dd.a);
+        var vy = -T.y * Math.cos(dd.a) + N.y * Math.sin(dd.a);
+        var ex = tipX + vx * (14 + dd.b * 10);
+        var ey = tipY + vy * (14 + dd.b * 10);
+        var mx = tipX + vx * 8 + N.x * 6;
+        var my = tipY + vy * 8 + N.y * 6;
+        tendrils[i].setAttribute("d",
+          "M" + tipX.toFixed(1) + " " + tipY.toFixed(1) +
+          " Q" + mx.toFixed(1) + " " + my.toFixed(1) +
+          " " + ex.toFixed(1) + " " + ey.toFixed(1));
+        tendrils[i].setAttribute("stroke-opacity", "0.85");
+      }
+
+      var headTip = { x: tipX, y: tipY };
+      for (i = 0; i < HEAD_DOTS; i++) {
+        var sd = dotSeed[i];
+        var ox = headTip.x + Math.cos(sd.a) * sd.r - T.x * sd.r * 0.4;
+        var oy = headTip.y + Math.sin(sd.a) * sd.r - T.y * sd.r * 0.4;
+        dotEls[i].setAttribute("cx", ox.toFixed(1));
+        dotEls[i].setAttribute("cy", oy.toFixed(1));
+        dotEls[i].setAttribute("r", sd.sz.toFixed(1));
+        dotEls[i].setAttribute("opacity", "0.9");
+      }
+
+      var trailCrest = null;
+      for (i = 0; i < n; i++) {
+        if (dist[i] > PERIOD * 0.7 && dist[i] < PERIOD * 1.3) {
+          if (profile(dist[i]) > AMP * 0.25) {
+            trailCrest = i;
+            break;
+          }
+        }
+      }
+      for (i = HEAD_DOTS; i < DOTS; i++) {
+        if (trailCrest !== null) {
+          var sd2 = dotSeed[i];
+          var cpx = pts[trailCrest].x + nx[trailCrest] * profile(dist[trailCrest]);
+          var cpy = pts[trailCrest].y + ny[trailCrest] * profile(dist[trailCrest]);
+          var ox2 = cpx + Math.cos(sd2.a) * sd2.r * 0.8;
+          var oy2 = cpy + Math.sin(sd2.a) * sd2.r * 0.8;
+          dotEls[i].setAttribute("cx", ox2.toFixed(1));
+          dotEls[i].setAttribute("cy", oy2.toFixed(1));
+          dotEls[i].setAttribute("r", sd2.sz.toFixed(1));
+          dotEls[i].setAttribute("opacity", "0.7");
+        } else {
+          dotEls[i].setAttribute("opacity", "0");
+        }
+      }
+
+      headEl.setAttribute("cx", head.x.toFixed(1));
+      headEl.setAttribute("cy", head.y.toFixed(1));
+      headEl.setAttribute("opacity", "0.9");
       svg.style.opacity = "1";
       requestAnimationFrame(frame);
     }
