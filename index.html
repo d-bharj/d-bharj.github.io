@@ -2215,7 +2215,7 @@
     opacity: 0;
     transition: opacity 0.5s ease;
   }
-  .wake-svg path{
+  .wake-svg path[stroke]{
     fill: none;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -2932,40 +2932,41 @@
 
   (function () {
     var NS = "http://www.w3.org/2000/svg";
-    var BANDS = 3;
-    var PERIOD = 115;
-    var LAMBDA = 160;
-    var AMP = 30;
-    var BAND_GAP = 9;
-    var CLAW_LEN = 46;
-    var CLAW_SEGS = 30;
-    var SPIRAL_TURNS = 2.4;
-    var DOTS = 14;
-    var HEAD_DOTS = 10;
-    var MAX_PTS = 260;
-    var MAX_AGE = 1700;
+    var MAX_AGE = 650;
+    var MAX_PTS = 220;
+    var WAKE_MAX = 340;
+    var ARM_BASE = [12, 18, 26];
+    var ARM_SLOPE = [0.16, 0.3, 0.46];
+    var ARM_W = [1.7, 1.3, 1.0];
+    var ARM_OP = [0.42, 0.26, 0.14];
+    var CLAW_LEN = 58;
+    var CLAW_SEGS = 26;
+    var CLAW_TURNS = 2.0;
+    var CLAW_FOAM = 12;
+    var SPRAY_MAX = 36;
     var svg = null;
-    var bandPaths = [];
+    var washPath = null;
+    var armPaths = [];
     var clawPath = null;
-    var tendrils = [];
-    var dotEls = [];
+    var clawFoam = [];
+    var sprayEls = [];
     var headEl = null;
     var pts = [];
     var cur = null;
     var lastPushed = null;
     var running = false;
-    var dotSeed = [];
+    var spray = [];
+    var seeds = [];
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
     var enabled = fine && !reduced;
 
     var i;
-    for (i = 0; i < DOTS; i++) {
-      dotSeed.push({
-        a: Math.random() * Math.PI * 2,
-        r: 4 + Math.random() * 16,
-        sz: 1 + Math.random() * 1.6
-      });
+    for (i = 0; i < SPRAY_MAX; i++) {
+      seeds.push({ a: Math.random() * Math.PI * 2, r: 2 + Math.random() * 9, sz: 1.2 + Math.random() * 1.4 });
+    }
+    for (i = 0; i < CLAW_FOAM; i++) {
+      clawFoam.push({ f: Math.random() * 0.3 });
     }
 
     function isFuji() {
@@ -2973,78 +2974,83 @@
     }
     function build() {
       if (svg) return;
-      var i;
+      var i, j, k;
       svg = document.createElementNS(NS, "svg");
       svg.setAttribute("class", "wake-svg");
-      var widths = [2.6, 2.0, 1.5];
-      for (i = 0; i < BANDS; i++) {
-        var p = document.createElementNS(NS, "path");
-        p.setAttribute("fill", "none");
-        p.setAttribute("stroke", "#1E3A8A");
-        p.setAttribute("stroke-width", widths[i]);
-        p.setAttribute("stroke-opacity", "0");
-        svg.appendChild(p);
-        bandPaths.push(p);
+
+      washPath = document.createElementNS(NS, "path");
+      washPath.setAttribute("fill", "#2AB4C4");
+      washPath.setAttribute("fill-opacity", "0");
+      svg.appendChild(washPath);
+
+      for (j = 0; j < 2; j++) {
+        for (k = 0; k < 3; k++) {
+          var p = document.createElementNS(NS, "path");
+          p.setAttribute("fill", "none");
+          p.setAttribute("stroke", "#1E3A8A");
+          p.setAttribute("stroke-width", ARM_W[k]);
+          p.setAttribute("stroke-opacity", "0");
+          svg.appendChild(p);
+          armPaths.push(p);
+        }
       }
+
       clawPath = document.createElementNS(NS, "path");
       clawPath.setAttribute("fill", "none");
       clawPath.setAttribute("stroke", "#1E3A8A");
-      clawPath.setAttribute("stroke-width", "3");
+      clawPath.setAttribute("stroke-width", "3.2");
       clawPath.setAttribute("stroke-opacity", "0");
       svg.appendChild(clawPath);
-      for (i = 0; i < 3; i++) {
-        var t = document.createElementNS(NS, "path");
-        t.setAttribute("fill", "none");
-        t.setAttribute("stroke", "#1E3A8A");
-        t.setAttribute("stroke-width", "1.6");
-        t.setAttribute("stroke-opacity", "0");
-        svg.appendChild(t);
-        tendrils.push(t);
+
+      for (i = 0; i < CLAW_FOAM; i++) {
+        var cf = document.createElementNS(NS, "circle");
+        cf.setAttribute("fill", "#FFFDF5");
+        cf.setAttribute("opacity", "0");
+        svg.appendChild(cf);
+        clawFoam[i].el = cf;
       }
-      for (i = 0; i < DOTS; i++) {
-        var c = document.createElementNS(NS, "circle");
-        c.setAttribute("fill", i % 4 === 0 ? "#2AB4C4" : "#1E3A8A");
-        c.setAttribute("opacity", "0");
-        svg.appendChild(c);
-        dotEls.push(c);
+      for (i = 0; i < SPRAY_MAX; i++) {
+        var s = document.createElementNS(NS, "circle");
+        s.setAttribute("fill", i % 5 === 0 ? "#2AB4C4" : "#FFFDF5");
+        s.setAttribute("opacity", "0");
+        svg.appendChild(s);
+        sprayEls.push(s);
       }
       headEl = document.createElementNS(NS, "circle");
       headEl.setAttribute("fill", "#2AB4C4");
-      headEl.setAttribute("r", "3.5");
+      headEl.setAttribute("r", "3.2");
       headEl.setAttribute("opacity", "0");
       svg.appendChild(headEl);
       document.body.appendChild(svg);
     }
-    function reset() {
-      pts.length = 0;
-      lastPushed = null;
-      if (!svg) return;
+    function hideAll() {
       var i;
-      for (i = 0; i < bandPaths.length; i++) bandPaths[i].setAttribute("d", "");
+      washPath.setAttribute("fill-opacity", "0");
+      for (i = 0; i < armPaths.length; i++) {
+        armPaths[i].setAttribute("d", "");
+        armPaths[i].setAttribute("stroke-opacity", "0");
+      }
       clawPath.setAttribute("d", "");
-      for (i = 0; i < tendrils.length; i++) tendrils[i].setAttribute("d", "");
-      for (i = 0; i < dotEls.length; i++) dotEls[i].setAttribute("opacity", "0");
+      clawPath.setAttribute("stroke-opacity", "0");
+      for (i = 0; i < clawFoam.length; i++) clawFoam[i].el.setAttribute("opacity", "0");
+      for (i = 0; i < sprayEls.length; i++) sprayEls[i].setAttribute("opacity", "0");
       headEl.setAttribute("opacity", "0");
       svg.style.opacity = "0";
     }
-    function profile(s) {
-      var wave = Math.cos((s / PERIOD) * Math.PI * 2);
-      var bump = Math.max(0, wave);
-      return AMP * Math.exp(-s / LAMBDA) * bump * bump * bump;
+    function reset() {
+      pts.length = 0;
+      spray.length = 0;
+      lastPushed = null;
+      if (!svg) return;
+      hideAll();
     }
-    function buildClaw(tip, T, N, len) {
-      var d = "";
-      for (var i = 0; i <= CLAW_SEGS; i++) {
-        var u = i / CLAW_SEGS;
-        var theta = Math.PI * (0.12 + u * (SPIRAL_TURNS * 2 + 0.35));
-        var r = len * (1 - u) * (1 - u * 0.35);
-        var dx = -T.x * Math.cos(theta) + N.x * Math.sin(theta);
-        var dy = -T.y * Math.cos(theta) + N.y * Math.sin(theta);
-        var px = tip.x + dx * r;
-        var py = tip.y + dy * r;
-        d += (i === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1);
-      }
-      return d;
+    function clawPoint(cx, cy, T, N, u) {
+      var phi = Math.PI * u * (CLAW_TURNS + 0.4);
+      var ca = Math.cos(phi), sa = Math.sin(phi);
+      var dx = T.x * ca + N.x * sa;
+      var dy = T.y * ca + N.y * sa;
+      var r = CLAW_LEN * Math.pow(1 - u, 0.8);
+      return { x: cx + dx * r, y: cy + dy * r };
     }
     function onMove(e) {
       if (!isFuji()) {
@@ -3060,7 +3066,7 @@
     }
     function frame() {
       var now = Date.now();
-      var i, j;
+      var i, j, k;
       if (!running) return;
       if (!isFuji()) {
         running = false;
@@ -3068,14 +3074,27 @@
         return;
       }
       if (!svg) build();
+
+      var speed = 0;
       if (cur && now - cur.t < 80) {
         if (!lastPushed || lastPushed.x !== cur.x || lastPushed.y !== cur.y) {
+          var prev = lastPushed;
           pts.push(cur);
           lastPushed = cur;
+          if (prev) {
+            speed = Math.sqrt(Math.pow(cur.x - prev.x, 2) + Math.pow(cur.y - prev.y, 2));
+          }
         }
       }
       while (pts.length && now - pts[0].t > MAX_AGE) pts.shift();
       if (pts.length > MAX_PTS) pts.splice(0, pts.length - MAX_PTS);
+      while (pts.length > 1) {
+        var lastPt = pts[pts.length - 1];
+        var firstPt = pts[0];
+        var sx = lastPt.x - firstPt.x, sy = lastPt.y - firstPt.y;
+        if (Math.sqrt(sx * sx + sy * sy) <= WAKE_MAX) break;
+        pts.shift();
+      }
 
       var n = pts.length;
       if (n < 4) {
@@ -3107,85 +3126,95 @@
         nx[i] = -ty[i]; ny[i] = tx[i];
       }
 
-      for (j = 0; j < BANDS; j++) {
-        var d = "";
-        for (i = 0; i < n; i++) {
-          var off = profile(dist[i]) + j * BAND_GAP;
-          var px = pts[i].x + nx[i] * off;
-          var py = pts[i].y + ny[i] * off;
-          d += (i === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1);
+      var tailFade = Math.min(1, dist[0] / WAKE_MAX);
+      var arm = 0;
+      for (k = 0; k < 3; k++) {
+        for (j = 0; j < 2; j++) {
+          var sgn = j === 0 ? 1 : -1;
+          var d = "";
+          for (i = 0; i < n; i++) {
+            var lat = (ARM_BASE[k] + dist[i] * ARM_SLOPE[k]) * sgn;
+            d += (i === 0 ? "M" : "L") + (pts[i].x + nx[i] * lat).toFixed(1) + " " + (pts[i].y + ny[i] * lat).toFixed(1);
+          }
+          armPaths[arm].setAttribute("d", d);
+          armPaths[arm].setAttribute("stroke-opacity", (ARM_OP[k] * tailFade).toFixed(2));
+          arm++;
         }
-        bandPaths[j].setAttribute("d", d);
-        bandPaths[j].setAttribute("stroke-opacity", (0.95 - j * 0.24).toFixed(2));
       }
+
+      var wd = "M" + pts[n - 1].x.toFixed(1) + " " + pts[n - 1].y.toFixed(1);
+      for (i = n - 1; i >= 0; i--) {
+        var lo = ARM_BASE[2] + dist[i] * ARM_SLOPE[2];
+        wd += "L" + (pts[i].x + nx[i] * lo).toFixed(1) + " " + (pts[i].y + ny[i] * lo).toFixed(1);
+      }
+      for (i = 0; i < n; i++) {
+        var ro = ARM_BASE[2] + dist[i] * ARM_SLOPE[2];
+        wd += "L" + (pts[i].x - nx[i] * ro).toFixed(1) + " " + (pts[i].y - ny[i] * ro).toFixed(1);
+      }
+      wd += "Z";
+      washPath.setAttribute("d", wd);
+      washPath.setAttribute("fill-opacity", (0.13 * tailFade).toFixed(3));
 
       var head = pts[n - 1];
       var T = { x: tx[n - 1], y: ty[n - 1] };
       var N = { x: nx[n - 1], y: ny[n - 1] };
-      var tipX = head.x + N.x * AMP;
-      var tipY = head.y + N.y * AMP;
-      clawPath.setAttribute("d", buildClaw({ x: tipX, y: tipY }, T, N, CLAW_LEN));
-      clawPath.setAttribute("stroke-opacity", "1");
+      var clawOp = Math.min(1, dist[0] / 130);
+      var cd = "";
+      for (i = 0; i <= CLAW_SEGS; i++) {
+        var u = i / CLAW_SEGS;
+        var cp = clawPoint(head.x, head.y, T, N, u);
+        cd += (i === 0 ? "M" : "L") + cp.x.toFixed(1) + " " + cp.y.toFixed(1);
+      }
+      clawPath.setAttribute("d", cd);
+      clawPath.setAttribute("stroke-opacity", (0.95 * clawOp).toFixed(2));
 
-      var dirs = [
-        { a: -0.4, b: 0.5 },
-        { a: 0.0, b: 0.8 },
-        { a: 0.45, b: 0.55 }
-      ];
-      for (i = 0; i < tendrils.length; i++) {
-        var dd = dirs[i];
-        var vx = -T.x * Math.cos(dd.a) + N.x * Math.sin(dd.a);
-        var vy = -T.y * Math.cos(dd.a) + N.y * Math.sin(dd.a);
-        var ex = tipX + vx * (14 + dd.b * 10);
-        var ey = tipY + vy * (14 + dd.b * 10);
-        var mx = tipX + vx * 8 + N.x * 6;
-        var my = tipY + vy * 8 + N.y * 6;
-        tendrils[i].setAttribute("d",
-          "M" + tipX.toFixed(1) + " " + tipY.toFixed(1) +
-          " Q" + mx.toFixed(1) + " " + my.toFixed(1) +
-          " " + ex.toFixed(1) + " " + ey.toFixed(1));
-        tendrils[i].setAttribute("stroke-opacity", "0.85");
+      for (i = 0; i < CLAW_FOAM; i++) {
+        var uf = (i + 0.5) / CLAW_FOAM;
+        var fp = clawPoint(head.x, head.y, T, N, uf);
+        var fa = Math.PI * uf * (CLAW_TURNS + 0.4);
+        var fox = fp.x + (T.x * Math.cos(fa) + N.x * Math.sin(fa)) * 2.5;
+        var foy = fp.y + (T.y * Math.cos(fa) + N.y * Math.sin(fa)) * 2.5;
+        clawFoam[i].el.setAttribute("cx", fox.toFixed(1));
+        clawFoam[i].el.setAttribute("cy", foy.toFixed(1));
+        clawFoam[i].el.setAttribute("r", (1.3 + clawFoam[i].f).toFixed(1));
+        clawFoam[i].el.setAttribute("opacity", (0.85 * (1 - uf * 0.5) * clawOp).toFixed(2));
       }
 
-      var headTip = { x: tipX, y: tipY };
-      for (i = 0; i < HEAD_DOTS; i++) {
-        var sd = dotSeed[i];
-        var ox = headTip.x + Math.cos(sd.a) * sd.r - T.x * sd.r * 0.4;
-        var oy = headTip.y + Math.sin(sd.a) * sd.r - T.y * sd.r * 0.4;
-        dotEls[i].setAttribute("cx", ox.toFixed(1));
-        dotEls[i].setAttribute("cy", oy.toFixed(1));
-        dotEls[i].setAttribute("r", sd.sz.toFixed(1));
-        dotEls[i].setAttribute("opacity", "0.9");
+      if (speed > 1.4 && spray.length < SPRAY_MAX) {
+        var sd = seeds[Math.floor(Math.random() * seeds.length)];
+        spray.push({
+          x: head.x + T.x * 6 + (Math.random() - 0.5) * 8,
+          y: head.y + T.y * 6 + (Math.random() - 0.5) * 8,
+          vx: -T.x * (2.4 + sd.r * 0.3) + N.x * (Math.random() - 0.5) * 3,
+          vy: -T.y * (2.4 + sd.r * 0.3) + N.y * (Math.random() - 0.5) * 3,
+          life: 1,
+          sz: sd.sz
+        });
       }
-
-      var trailCrest = null;
-      for (i = 0; i < n; i++) {
-        if (dist[i] > PERIOD * 0.7 && dist[i] < PERIOD * 1.3) {
-          if (profile(dist[i]) > AMP * 0.25) {
-            trailCrest = i;
-            break;
-          }
-        }
+      for (i = 0; i < spray.length; i++) {
+        var sp = spray[i];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.vx *= 0.92;
+        sp.vy *= 0.92;
+        sp.life -= 0.045;
       }
-      for (i = HEAD_DOTS; i < DOTS; i++) {
-        if (trailCrest !== null) {
-          var sd2 = dotSeed[i];
-          var cpx = pts[trailCrest].x + nx[trailCrest] * profile(dist[trailCrest]);
-          var cpy = pts[trailCrest].y + ny[trailCrest] * profile(dist[trailCrest]);
-          var ox2 = cpx + Math.cos(sd2.a) * sd2.r * 0.8;
-          var oy2 = cpy + Math.sin(sd2.a) * sd2.r * 0.8;
-          dotEls[i].setAttribute("cx", ox2.toFixed(1));
-          dotEls[i].setAttribute("cy", oy2.toFixed(1));
-          dotEls[i].setAttribute("r", sd2.sz.toFixed(1));
-          dotEls[i].setAttribute("opacity", "0.7");
+      while (spray.length && spray[0].life <= 0) spray.shift();
+      for (i = 0; i < SPRAY_MAX; i++) {
+        if (i < spray.length) {
+          var p2 = spray[i];
+          sprayEls[i].setAttribute("cx", p2.x.toFixed(1));
+          sprayEls[i].setAttribute("cy", p2.y.toFixed(1));
+          sprayEls[i].setAttribute("r", (p2.sz * (0.5 + 0.5 * Math.max(0, p2.life))).toFixed(1));
+          sprayEls[i].setAttribute("opacity", (0.8 * Math.max(0, p2.life)).toFixed(2));
         } else {
-          dotEls[i].setAttribute("opacity", "0");
+          sprayEls[i].setAttribute("opacity", "0");
         }
       }
 
       headEl.setAttribute("cx", head.x.toFixed(1));
       headEl.setAttribute("cy", head.y.toFixed(1));
-      headEl.setAttribute("opacity", "0.9");
+      headEl.setAttribute("opacity", "0.85");
       svg.style.opacity = "1";
       requestAnimationFrame(frame);
     }
