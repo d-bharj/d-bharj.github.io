@@ -2931,15 +2931,15 @@
     var enabled = fine && !reduced;
 
     var MAX_PARTICLES = 260;
-    var EMIT_GAP = 24;
+    var EMIT_GAP = 22;
     var SPAWN_PER_TICK = 3;
     var FRICTION = 0.86;
     var STOP_SPEED = 14;
     var SETTLE_MIN = 0.5;
     var SETTLE_MAX = 1.3;
     var FADE_MS = 550;
-    var GRAIN = 3.2;
-    var TONES = ["#C9A25B", "#B88A42", "#D8BB7C", "#9C7238", "#CBA76B"];
+    var GRAIN = 4.2;
+    var TONES = ["#A6782F", "#8F6423", "#B8863B", "#C9974A", "#7C5620"];
 
     var overlay = null;
     var canvas = null;
@@ -2961,12 +2961,18 @@
         c.width = c.height = s;
         var g = c.getContext("2d");
         g.fillStyle = TONES[i];
-        var n = 2 + (Math.random() * 3 | 0);
-        for (var j = 0; j < n; j++) {
-          g.beginPath();
-          g.arc(s * (0.2 + Math.random() * 0.6), s * (0.2 + Math.random() * 0.6), dpr * (1 + Math.random() * 0.7), 0, Math.PI * 2);
-          g.fill();
+        var cx = s / 2, cy = s / 2;
+        g.beginPath();
+        for (var k = 0; k < 7; k++) {
+          var a = (k / 7) * Math.PI * 2 + Math.random() * 0.6;
+          var r = s * (0.2 + Math.random() * 0.22);
+          var px = cx + Math.cos(a) * r;
+          var py = cy + Math.sin(a) * r;
+          if (k === 0) g.moveTo(px, py);
+          else g.lineTo(px, py);
         }
+        g.closePath();
+        g.fill();
         sprites.push(c);
       }
     }
@@ -3047,7 +3053,7 @@
         p.state = 0;
         p.settleAt = 0;
         p.fadeAt = 0;
-        p.maxA = 0.75 + Math.random() * 0.2;
+        p.maxA = 0.85 + Math.random() * 0.15;
         p.alpha = p.maxA;
       }
     }
