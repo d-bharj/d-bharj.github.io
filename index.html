@@ -2203,22 +2203,45 @@
     [data-theme="news"] .topnav-links a + a::before{ margin: 0 9px; }
   }
 
-  /* ---- Retro Fuji: Great Wave cursor wake ---- */
-  .wake-svg{
+  /* ---- Retro Fuji: Hokusai Great Wave cursor trail ---- */
+  .wave-overlay{
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2147483000;
+    z-index: 2147482000;
     pointer-events: none;
     overflow: hidden;
-    opacity: 0;
-    transition: opacity 0.5s ease;
   }
-  .wake-svg path[stroke]{
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+  .wave{
+    position: absolute;
+    width: 44px;
+    height: 41px;
+    margin-left: -22px;
+    margin-top: -20px;
+    opacity: 0.95;
+    transform: rotate(var(--r, 0deg)) scale(1);
+    transform-origin: 50% 70%;
+    transition: opacity 0.48s ease, transform 0.48s ease;
+    will-change: transform, opacity;
+  }
+  .wave.fading{
+    opacity: 0;
+    transform: rotate(var(--r, 0deg)) scale(0.72);
+  }
+  .wave svg{
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .w-body{
+    fill: #1E3A8A;
+    stroke: #13295C;
+    stroke-width: 1.6;
+  }
+  .w-foam{
+    fill: #F2EEE3;
+    stroke: #13295C;
+    stroke-width: 1.1;
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -2931,274 +2954,84 @@
   })();
 
   (function () {
-    var NS = "http://www.w3.org/2000/svg";
-    var MAX_AGE = 520;
-    var MAX_PTS = 180;
-    var WAKE_MAX = 190;
-    var ARM_BASE = [8, 12, 16];
-    var ARM_SLOPE = [0.1, 0.18, 0.27];
-    var ARM_W = [1.4, 1.1, 0.9];
-    var ARM_OP = [0.38, 0.24, 0.13];
-    var BOW_DOTS = 10;
-    var SPRAY_MAX = 24;
-    var svg = null;
-    var washPath = null;
-    var armPaths = [];
-    var bowFoam = [];
-    var sprayEls = [];
-    var headEl = null;
-    var pts = [];
-    var cur = null;
-    var lastPushed = null;
-    var running = false;
-    var spray = [];
-    var seeds = [];
     var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
     var enabled = fine && !reduced;
+    var MAX_WAVES = 18;
+    var SPAWN_GAP = 38;
+    var HOLD = 120;
+    var FADE = 480;
+    var overlay = null;
+    var lastSpawn = 0;
+    var last = null;
 
-    var i;
-    for (i = 0; i < SPRAY_MAX; i++) {
-      seeds.push({ a: Math.random() * Math.PI * 2, r: 2 + Math.random() * 6, sz: 0.9 + Math.random() * 0.9 });
-    }
-    for (i = 0; i < BOW_DOTS; i++) {
-      bowFoam.push({ b: (Math.random() - 0.5) * 22, r: 11 + Math.random() * 8, sz: 1.0 + Math.random() * 0.9 });
-    }
+    var WAVE_SVG =
+      '<svg viewBox="0 0 64 60" aria-hidden="true">' +
+      '<path class="w-body" d="M8 54 C8 34 18 18 34 12 C46 8 56 12 56 20 C56 26 50 30 44 28 C40 27 39 23 42 21 C40 22 36 24 30 27 C22 31 16 39 17 50 Z"/>' +
+      '<path class="w-foam" d="M29 16 L32 6 L35 15 L38 4 L41 14 L45 6 L48 14 C50 13 50 17 47 18 C42 19 36 19 31 19 Z"/>' +
+      '<circle class="w-foam" cx="24" cy="16" r="2.6"/>' +
+      '<circle class="w-foam" cx="27" cy="11" r="1.9"/>' +
+      '<circle class="w-foam" cx="33" cy="9" r="1.7"/>' +
+      '<circle class="w-foam" cx="40" cy="8" r="2.1"/>' +
+      '<circle class="w-foam" cx="46" cy="10" r="1.6"/>' +
+      '<circle class="w-foam" cx="51" cy="13" r="1.9"/>' +
+      '</svg>';
 
     function isFuji() {
       return document.documentElement.getAttribute("data-theme") === "retro-fuji";
     }
-    function build() {
-      if (svg) return;
-      var i, j, k;
-      svg = document.createElementNS(NS, "svg");
-      svg.setAttribute("class", "wake-svg");
-
-      washPath = document.createElementNS(NS, "path");
-      washPath.setAttribute("fill", "#2AB4C4");
-      washPath.setAttribute("fill-opacity", "0");
-      svg.appendChild(washPath);
-
-      for (j = 0; j < 2; j++) {
-        for (k = 0; k < 3; k++) {
-          var p = document.createElementNS(NS, "path");
-          p.setAttribute("fill", "none");
-          p.setAttribute("stroke", "#1E3A8A");
-          p.setAttribute("stroke-width", ARM_W[k]);
-          p.setAttribute("stroke-opacity", "0");
-          svg.appendChild(p);
-          armPaths.push(p);
-        }
+    function clearAll() {
+      if (overlay) {
+        while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
       }
-
-      for (i = 0; i < BOW_DOTS; i++) {
-        var cf = document.createElementNS(NS, "circle");
-        cf.setAttribute("fill", "#FFFDF5");
-        cf.setAttribute("opacity", "0");
-        svg.appendChild(cf);
-        bowFoam[i].el = cf;
-      }
-      for (i = 0; i < SPRAY_MAX; i++) {
-        var s = document.createElementNS(NS, "circle");
-        s.setAttribute("fill", i % 5 === 0 ? "#2AB4C4" : "#FFFDF5");
-        s.setAttribute("opacity", "0");
-        svg.appendChild(s);
-        sprayEls.push(s);
-      }
-      headEl = document.createElementNS(NS, "circle");
-      headEl.setAttribute("fill", "#2AB4C4");
-      headEl.setAttribute("r", "2.8");
-      headEl.setAttribute("opacity", "0");
-      svg.appendChild(headEl);
-      document.body.appendChild(svg);
     }
-    function hideAll() {
-      var i;
-      washPath.setAttribute("fill-opacity", "0");
-      for (i = 0; i < armPaths.length; i++) {
-        armPaths[i].setAttribute("d", "");
-        armPaths[i].setAttribute("stroke-opacity", "0");
+    function spawn(x, y, deg) {
+      if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.className = "wave-overlay";
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.appendChild(overlay);
       }
-      for (i = 0; i < bowFoam.length; i++) bowFoam[i].el.setAttribute("opacity", "0");
-      for (i = 0; i < sprayEls.length; i++) sprayEls[i].setAttribute("opacity", "0");
-      headEl.setAttribute("opacity", "0");
-      svg.style.opacity = "0";
-    }
-    function reset() {
-      pts.length = 0;
-      spray.length = 0;
-      lastPushed = null;
-      if (!svg) return;
-      hideAll();
+      while (overlay.childNodes.length >= MAX_WAVES) overlay.removeChild(overlay.firstChild);
+      var el = document.createElement("div");
+      el.className = "wave";
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      el.style.setProperty("--r", deg + "deg");
+      el.innerHTML = WAVE_SVG;
+      overlay.appendChild(el);
+      setTimeout(function () {
+        el.classList.add("fading");
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, FADE + 60);
+      }, HOLD);
     }
     function onMove(e) {
-      if (!isFuji()) {
-        running = false;
-        reset();
-        return;
-      }
-      cur = { x: e.clientX, y: e.clientY, t: Date.now() };
-      if (!running) {
-        running = true;
-        requestAnimationFrame(frame);
-      }
-    }
-    function frame() {
+      if (!isFuji()) return;
       var now = Date.now();
-      var i, j, k;
-      if (!running) return;
-      if (!isFuji()) {
-        running = false;
-        reset();
+      if (now - lastSpawn < SPAWN_GAP) return;
+      if (!last || now - last.t > 150) {
+        lastSpawn = now;
+        last = { x: e.clientX, y: e.clientY, t: now };
         return;
       }
-      if (!svg) build();
-
-      var speed = 0;
-      if (cur && now - cur.t < 80) {
-        if (!lastPushed || lastPushed.x !== cur.x || lastPushed.y !== cur.y) {
-          var prev = lastPushed;
-          pts.push(cur);
-          lastPushed = cur;
-          if (prev) {
-            speed = Math.sqrt(Math.pow(cur.x - prev.x, 2) + Math.pow(cur.y - prev.y, 2));
-          }
-        }
-      }
-      while (pts.length && now - pts[0].t > MAX_AGE) pts.shift();
-      if (pts.length > MAX_PTS) pts.splice(0, pts.length - MAX_PTS);
-      while (pts.length > 1) {
-        var lastPt = pts[pts.length - 1];
-        var firstPt = pts[0];
-        var sx = lastPt.x - firstPt.x, sy = lastPt.y - firstPt.y;
-        if (Math.sqrt(sx * sx + sy * sy) <= WAKE_MAX) break;
-        pts.shift();
-      }
-
-      var n = pts.length;
-      if (n < 4) {
-        if (!(cur && now - cur.t < 160)) {
-          running = false;
-          reset();
-          return;
-        }
-        requestAnimationFrame(frame);
-        return;
-      }
-
-      var dist = new Array(n);
-      dist[n - 1] = 0;
-      for (i = n - 2; i >= 0; i--) {
-        var ddx = pts[i].x - pts[i + 1].x;
-        var ddy = pts[i].y - pts[i + 1].y;
-        dist[i] = dist[i + 1] + Math.sqrt(ddx * ddx + ddy * ddy);
-      }
-
-      var tx = new Array(n), ty = new Array(n);
-      var nx = new Array(n), ny = new Array(n);
-      for (i = 0; i < n; i++) {
-        var ax = pts[Math.max(0, i - 1)].x, ay = pts[Math.max(0, i - 1)].y;
-        var bx = pts[Math.min(n - 1, i + 1)].x, by = pts[Math.min(n - 1, i + 1)].y;
-        var vx = bx - ax, vy = by - ay;
-        var len = Math.sqrt(vx * vx + vy * vy) || 1;
-        tx[i] = vx / len; ty[i] = vy / len;
-        nx[i] = -ty[i]; ny[i] = tx[i];
-      }
-
-      var tailFade = Math.min(1, dist[0] / WAKE_MAX);
-      var arm = 0;
-      for (k = 0; k < 3; k++) {
-        for (j = 0; j < 2; j++) {
-          var sgn = j === 0 ? 1 : -1;
-          var d = "";
-          for (i = 0; i < n; i++) {
-            var lat = (ARM_BASE[k] + dist[i] * ARM_SLOPE[k]) * sgn;
-            d += (i === 0 ? "M" : "L") + (pts[i].x + nx[i] * lat).toFixed(1) + " " + (pts[i].y + ny[i] * lat).toFixed(1);
-          }
-          armPaths[arm].setAttribute("d", d);
-          armPaths[arm].setAttribute("stroke-opacity", (ARM_OP[k] * tailFade).toFixed(2));
-          arm++;
-        }
-      }
-
-      var wd = "M" + pts[n - 1].x.toFixed(1) + " " + pts[n - 1].y.toFixed(1);
-      for (i = n - 1; i >= 0; i--) {
-        var lo = ARM_BASE[2] + dist[i] * ARM_SLOPE[2];
-        wd += "L" + (pts[i].x + nx[i] * lo).toFixed(1) + " " + (pts[i].y + ny[i] * lo).toFixed(1);
-      }
-      for (i = 0; i < n; i++) {
-        var ro = ARM_BASE[2] + dist[i] * ARM_SLOPE[2];
-        wd += "L" + (pts[i].x - nx[i] * ro).toFixed(1) + " " + (pts[i].y - ny[i] * ro).toFixed(1);
-      }
-      wd += "Z";
-      washPath.setAttribute("d", wd);
-      washPath.setAttribute("fill-opacity", (0.11 * tailFade).toFixed(3));
-
-      var head = pts[n - 1];
-      var T = { x: tx[n - 1], y: ty[n - 1] };
-      var N = { x: nx[n - 1], y: ny[n - 1] };
-      var bowOp = Math.min(1, dist[0] / 90);
-      for (i = 0; i < BOW_DOTS; i++) {
-        var bd = bowFoam[i];
-        var ba = (-70 + i * (140 / (BOW_DOTS - 1)) + bd.b) * Math.PI / 180;
-        var bx = T.x * Math.cos(ba) + N.x * Math.sin(ba);
-        var by = T.y * Math.cos(ba) + N.y * Math.sin(ba);
-        bowFoam[i].el.setAttribute("cx", (head.x + bx * bd.r).toFixed(1));
-        bowFoam[i].el.setAttribute("cy", (head.y + by * bd.r).toFixed(1));
-        bowFoam[i].el.setAttribute("r", bd.sz.toFixed(1));
-        var taper = i === 0 || i === BOW_DOTS - 1 ? 0.4 : 1;
-        bowFoam[i].el.setAttribute("opacity", (0.9 * taper * bowOp).toFixed(2));
-      }
-
-      if (speed > 1.1 && spray.length < SPRAY_MAX) {
-        var sd = seeds[Math.floor(Math.random() * seeds.length)];
-        spray.push({
-          x: head.x + T.x * 5 + (Math.random() - 0.5) * 6,
-          y: head.y + T.y * 5 + (Math.random() - 0.5) * 6,
-          vx: -T.x * (1.8 + sd.r * 0.25) + N.x * (Math.random() - 0.5) * 2.2,
-          vy: -T.y * (1.8 + sd.r * 0.25) + N.y * (Math.random() - 0.5) * 2.2,
-          life: 1,
-          sz: sd.sz
-        });
-      }
-      for (i = 0; i < spray.length; i++) {
-        var sp = spray[i];
-        sp.x += sp.vx;
-        sp.y += sp.vy;
-        sp.vx *= 0.92;
-        sp.vy *= 0.92;
-        sp.life -= 0.05;
-      }
-      while (spray.length && spray[0].life <= 0) spray.shift();
-      for (i = 0; i < SPRAY_MAX; i++) {
-        if (i < spray.length) {
-          var p2 = spray[i];
-          sprayEls[i].setAttribute("cx", p2.x.toFixed(1));
-          sprayEls[i].setAttribute("cy", p2.y.toFixed(1));
-          sprayEls[i].setAttribute("r", (p2.sz * (0.5 + 0.5 * Math.max(0, p2.life))).toFixed(1));
-          sprayEls[i].setAttribute("opacity", (0.7 * Math.max(0, p2.life)).toFixed(2));
-        } else {
-          sprayEls[i].setAttribute("opacity", "0");
-        }
-      }
-
-      headEl.setAttribute("cx", head.x.toFixed(1));
-      headEl.setAttribute("cy", head.y.toFixed(1));
-      headEl.setAttribute("opacity", "0.85");
-      svg.style.opacity = "1";
-      requestAnimationFrame(frame);
+      var deg = Math.atan2(e.clientY - last.y, e.clientX - last.x) * 180 / Math.PI;
+      lastSpawn = now;
+      last = { x: e.clientX, y: e.clientY, t: now };
+      spawn(e.clientX, e.clientY, deg);
     }
 
     if (enabled) {
       document.addEventListener("pointermove", onMove, { passive: true });
+      var obs = new MutationObserver(function () {
+        if (!isFuji()) {
+          last = null;
+          clearAll();
+        }
+      });
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     }
-    var obs = new MutationObserver(function () {
-      if (!isFuji()) {
-        running = false;
-        reset();
-      }
-    });
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   })();
 
 </script>
