@@ -2465,6 +2465,43 @@
           </div>
           </div>
         </div>
+        <div class="project-card reveal">
+          <div class="card-glow" aria-hidden="true"></div>
+          <div class="card-inner">
+          <div class="project-tag">LBO Model</div>
+          <h3>LBO Return Sensitivity Model</h3>
+          <p>
+            Five-year leveraged buyout model that sweeps entry and exit EBITDA multiples across an
+            81-scenario grid and computes the IRR on the equity cheque, rendered as a pitch-book
+            quality sensitivity heatmap.
+          </p>
+          <div class="stack">Python · NumPy · Matplotlib</div>
+          <div class="repo-meta" data-repo="lbo"></div>
+          <div class="code-row">
+            <button class="code-tab" type="button" data-panel="lbo-panel"><span class="chev">▸</span> View code</button>
+            <button class="code-tab dash-tab" type="button" data-panel="lbo-dash"><span class="chev">▸</span> Heatmap</button>
+            <a class="repo-link" href="https://github.com/d-bharj/LBO-Return-Sensitivity-Model" target="_blank" rel="noopener">Link to GitHub ↗</a>
+          </div>
+          <div class="code-panel" id="lbo-panel" data-src="https://raw.githubusercontent.com/d-bharj/LBO-Return-Sensitivity-Model/master/lbo_sensitivity_screener.py">
+            <div class="panel-head">
+              <span class="panel-sub">Sweeps entry × exit multiples and computes 5-year equity IRR.</span>
+              <button class="panel-close" type="button" data-panel="lbo-panel" aria-label="Close">✕</button>
+            </div>
+            <div class="panel-body">
+              <pre><code id="lbo-code" class="language-python"><span class="code-msg">Loading code…</span></code></pre>
+            </div>
+          </div>
+          <div class="dash-panel" id="lbo-dash">
+            <div class="panel-head">
+              <span class="panel-sub">IRR across the entry/exit grid; the outlined base case is 10.0x in, 12.0x out.</span>
+              <button class="panel-close" type="button" data-panel="lbo-dash" aria-label="Close">✕</button>
+            </div>
+            <div class="dash-body">
+              <img class="dash-frame" title="LBO IRR sensitivity heatmap" alt="LBO IRR sensitivity heatmap" data-src="https://raw.githubusercontent.com/d-bharj/LBO-Return-Sensitivity-Model/master/LBO_Heatmap.png" loading="lazy">
+            </div>
+          </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2527,7 +2564,7 @@
 
     function loadCode(panel) {
       if (panel.dataset.loaded === "1") return;
-      var frame = panel.querySelector("iframe.dash-frame");
+      var frame = panel.querySelector(".dash-frame[data-src]");
       if (frame && frame.dataset.src) {
         if (!frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
         panel.dataset.loaded = "1";
@@ -2907,7 +2944,8 @@
 
     [
       ["comps", "auto-comparable-company-analysis"],
-      ["gas", "gas-price-weather-sensitivity-model"]
+      ["gas", "gas-price-weather-sensitivity-model"],
+      ["lbo", "LBO-Return-Sensitivity-Model"]
     ].forEach(function (r) {
       fetch("https://api.github.com/repos/d-bharj/" + r[1], { headers: { "Accept": "application/vnd.github+json" } })
         .then(function (res) { return res.ok ? res.json() : null; })
