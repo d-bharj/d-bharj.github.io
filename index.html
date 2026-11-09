@@ -10,7 +10,7 @@
     var THEMES = ["light", "dark", "regatta", "guild", "glacier", "retro-fuji", "old-money", "news", "sharks"];
     var t = null;
     try { t = localStorage.getItem("db-theme"); } catch (e) {}
-    if (!t || THEMES.indexOf(t) === -1) t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+    if (!t || THEMES.indexOf(t) === -1) t = "sharks";
     document.documentElement.setAttribute("data-theme", t);
   })();
 </script>
